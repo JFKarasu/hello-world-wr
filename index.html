@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 新年快乐</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Start Button / Overlay -->
+    <div id="start-screen">
+        <button id="start-btn">点击开启 2026 之旅</button>
+    </div>
+
+    <!-- Background Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Poem Container (HTML Overlay) -->
+    <div id="poem-container" class="hidden">
+        <div class="poem-line">遇见从来没有早晚，也没有对错，</div>
+        <div class="poem-line">缘分没有长短，只有深浅，</div>
+        <div class="poem-line">我一点都不遗憾，没有在最好的年纪遇见你，</div>
+        <div class="poem-line">因为在遇见你之后，最好的时光才刚刚开始，</div>
+        <div class="poem-line">我并不知道我们能走多远，</div>
+        <div class="poem-line">但只要你不松手，我就不会先走，</div>
+        <div class="poem-line">从此入目无他人，四下皆是你，</div>
+        <div class="poem-line">我见众生皆草木，唯独见你是青山，</div>
+        <div class="poem-line">此生虽短，幸而有你，人间便不算太冷。</div>
+    </div>
+
+    <!-- Audio Element -->
+    <!-- Using NetEase Cloud Music external link for '寂寞烟火' (Lonely Fireworks) -->
+    <!-- Note: If this link expires or fails, please replace with a valid MP3 URL -->
+    <audio id="bgm" loop>
+        <source src="@/assets/music/如愿.mp3" type="audio/mp3">
+        您的浏览器不支持音频播放。
+    </audio>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
