@@ -10,7 +10,11 @@
 <body>
     <!-- Start Button / Overlay -->
     <div id="start-screen">
-        <button id="start-btn">点击开启 2026 之旅</button>
+        <div id="countdown-container">
+            <div class="countdown-title">距离开启还有</div>
+            <div id="countdown-timer">00天 00时 00分 00秒</div>
+        </div>
+        <button id="start-btn" class="hidden">点击开启 2026 之旅</button>
     </div>
 
     <!-- Background Canvas -->
@@ -36,11 +40,30 @@
         <div id="todo-center-text"></div>
     </div>
 
+    <!-- Question Modal -->
+    <div id="question-modal" class="hidden">
+        <div class="modal-content">
+            <h2>心灵问答</h2>
+            <p>你叫什么名字？</p>
+            <input type="text" id="answer-input" placeholder="请输入答案">
+            <button id="submit-answer-btn">确认</button>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Video Overlay -->
+    <div id="video-overlay" class="hidden">
+        <video id="popup-video" controls>
+            您的浏览器不支持视频播放。
+        </video>
+        <button id="close-video-btn">×</button>
+    </div>
+
     <!-- Audio Element -->
     <!-- Using NetEase Cloud Music external link for '寂寞烟火' (Lonely Fireworks) -->
     <!-- Note: If this link expires or fails, please replace with a valid MP3 URL -->
     <audio id="bgm" loop>
-        <source src="assets/music/如愿.mp3" type="audio/mp3">
+        <source src="assets/music/唯一.mp3" type="audio/mp3">
         您的浏览器不支持音频播放。
     </audio>
 

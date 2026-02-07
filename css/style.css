@@ -168,3 +168,135 @@ body {
         font-size: 1rem !important; /* Force smaller size on mobile */
     }
 }
+
+/* Countdown Styles */
+#countdown-container {
+    text-align: center;
+    color: #fff;
+    font-family: 'Noto Serif SC', serif;
+    z-index: 101; /* Above start screen background */
+}
+
+.countdown-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    opacity: 0.8;
+    letter-spacing: 2px;
+}
+
+#countdown-timer {
+    font-size: 5rem; /* Increased from 2.5rem to 5rem (2x) */
+    font-weight: bold;
+    font-family: 'Ma Shan Zheng', cursive;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    letter-spacing: 1px;
+}
+
+/* Question Modal Styles */
+#question-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 150;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    color: white;
+    width: 300px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.modal-content h2 {
+    font-family: 'Ma Shan Zheng', cursive;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #ffcc00;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+#answer-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+    text-align: center;
+}
+
+#submit-answer-btn {
+    padding: 8px 25px;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+#submit-answer-btn:hover {
+    background: #ff3333;
+    transform: scale(1.05);
+}
+
+#error-msg {
+    margin-top: 15px;
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    height: 20px;
+}
+
+/* Video Overlay Styles */
+#video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#popup-video {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+#close-video-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 3rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 201;
+    transition: transform 0.3s;
+}
+
+#close-video-btn:hover {
+    transform: scale(1.2) rotate(90deg);
+}
