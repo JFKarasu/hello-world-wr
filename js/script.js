@@ -23,10 +23,10 @@ let textScale = 1;
 const ARIES = {
     name: "Aries",
     stars: [
-        {x: 0.15, y: 0.3},
-        {x: 0.18, y: 0.25},
-        {x: 0.22, y: 0.27},
-        {x: 0.25, y: 0.35}
+        {x: 0.15, y: 0.60}, // Left Bottom
+        {x: 0.25, y: 0.50}, // Middle
+        {x: 0.35, y: 0.40}, // Top Right
+        {x: 0.38, y: 0.43}  // Hook Tip
     ],
     lines: [[0, 1], [1, 2], [2, 3]]
 };
@@ -34,13 +34,12 @@ const ARIES = {
 const CANCER = {
     name: "Cancer",
     stars: [
-        {x: 0.80, y: 0.30}, // Center
-        {x: 0.75, y: 0.20}, // Top Left
-        {x: 0.85, y: 0.20}, // Top Right
-        {x: 0.75, y: 0.45}, // Bottom Left
-        {x: 0.85, y: 0.45}  // Bottom Right
+        {x: 0.68, y: 0.48}, // Left
+        {x: 0.75, y: 0.45}, // Junction
+        {x: 0.82, y: 0.55}, // Right
+        {x: 0.73, y: 0.35}  // Top
     ],
-    lines: [[0, 1], [0, 2], [0, 3], [0, 4]]
+    lines: [[0, 1], [1, 2], [1, 3]]
 };
 
 // --- Countdown Logic ---
@@ -1047,11 +1046,19 @@ const questionModal = document.getElementById('question-modal');
 const answerInput = document.getElementById('answer-input');
 const submitAnswerBtn = document.getElementById('submit-answer-btn');
 const errorMsg = document.getElementById('error-msg');
+const disclaimerModal = document.getElementById('disclaimer-modal');
+const agreeBtn = document.getElementById('agree-btn');
 
 let wrongAttempts = 0;
 
 startBtn.addEventListener('click', () => {
-    // Show Question Modal
+    // Show Disclaimer Modal first
+    disclaimerModal.classList.remove('hidden');
+});
+
+agreeBtn.addEventListener('click', () => {
+    disclaimerModal.classList.add('hidden');
+    // Show Question Modal after agreeing
     questionModal.classList.remove('hidden');
     answerInput.focus();
 });
@@ -1108,13 +1115,18 @@ function drawConstellation(constellation) {
     });
 
     // Draw Stars
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 15; // Increased glow
     ctx.shadowColor = 'white';
     
-    constellation.stars.forEach(star => {
+    const time = Date.now() * 0.003;
+    
+    constellation.stars.forEach((star, index) => {
+        // Twinkle effect using sine wave based on time + random index offset
+        const alpha = 0.5 + 0.5 * Math.sin(time + index * 10);
+        
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(star.x * width, star.y * height, 3, 0, Math.PI * 2);
+        ctx.arc(star.x * width, star.y * height, 4, 0, Math.PI * 2); // Increased size to 4
         ctx.fill();
     });
 

@@ -192,6 +192,128 @@ body {
     letter-spacing: 1px;
 }
 
+/* Disclaimer Modal Styles */
+#disclaimer-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 120;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.disclaimer-content {
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid #333;
+    padding: 40px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    color: #fff;
+    font-family: 'Noto Serif SC', serif;
+    position: relative;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+.disclaimer-content h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #fff;
+    padding-bottom: 10px;
+}
+
+.disclaimer-body {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.disclaimer-body h3 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #fff;
+    border-left: 4px solid #ff4d4d;
+    padding-left: 10px;
+}
+
+.disclaimer-body ul, .disclaimer-body ol {
+    padding-left: 25px;
+    margin-bottom: 15px;
+}
+
+.disclaimer-body li {
+    margin-bottom: 5px;
+}
+
+.tips {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #666;
+    color: #ff4d4d;
+    font-size: 0.9rem;
+}
+
+.disclaimer-footer {
+    margin-top: 40px;
+    text-align: center;
+    position: relative;
+    padding-top: 40px;
+}
+
+.arrow-container {
+    position: absolute;
+    top: -10px; /* Moved up */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: bounce 1s infinite;
+}
+
+.click-hint {
+    color: #ff69b4; /* Hot Pink (Playful) */
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    font-family: 'Ma Shan Zheng', cursive; /* Artistic Font */
+}
+
+.arrow {
+    font-size: 2rem;
+    color: #ff69b4; /* Hot Pink */
+    font-family: 'Ma Shan Zheng', cursive; /* Artistic Font */
+}
+
+#agree-btn {
+    padding: 10px 40px;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+#agree-btn:hover {
+    background: #ff3333;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
 /* Question Modal Styles */
 #question-modal {
     position: fixed;
