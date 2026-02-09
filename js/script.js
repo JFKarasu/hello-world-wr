@@ -5,6 +5,7 @@ const startScreen = document.getElementById('start-screen');
 const poemContainer = document.getElementById('poem-container');
 const todoContainer = document.getElementById('todo-container');
 const todoCenterText = document.getElementById('todo-center-text');
+const skipBtn = document.getElementById('skip-btn');
 const bgm = document.getElementById('bgm');
 
 let width, height;
@@ -45,9 +46,12 @@ const CANCER = {
 // --- Countdown Logic ---
 // 目标时间：2026年除夕（2026年2月16日）的24点，即2026年2月17日0点
 // 注意：JavaScript中月份是从0开始的，所以2月是1
-const TARGET_DATE = new Date(2026, 1, 17, 0, 0, 0).getTime();
+const TARGET_DATE = new Date(2026, 1, 9, 17, 35, 0).getTime();
+const SPHERE_TARGET_DATE = TARGET_DATE - 10000; // 10 seconds before target
 
 function updateCountdown() {
+    if (currentPhase !== 0) return; // Stop updating if not in idle phase
+
     const currentTime = new Date().getTime();
     const distance = TARGET_DATE - currentTime;
     
@@ -56,7 +60,7 @@ function updateCountdown() {
     const timerElement = document.getElementById('countdown-timer');
 
     // 5 minutes in milliseconds
-    const FIVE_MINUTES = 5 * 60 * 1000;
+    const FIVE_MINUTES = 10 * 60 * 1000;
 
     // Show button if time is within 5 minutes or already passed
     if (distance < FIVE_MINUTES) {
@@ -181,13 +185,15 @@ function getNextBlessing() {
 
 const TODO_ITEMS = [
     "一起露营", "一起看日出", "一起堆雪人", "一起拼乐高", "一起放烟花", "一起做早餐", "一起打羽毛球", "一起吹晚风", "一起去鬼屋", "一起种盆栽",
-    "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
-    "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
-    "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起骑车",
-    "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
-    "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
-    "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
-    "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去"
+    // "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
+    // "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
+    // "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起溜冰",
+    // "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
+    // "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
+    // "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
+    // "一起挖沙子", "一起窜巷子", "一起跑步", "一起踩水坑", "一起坐船", "一起晒太阳", "一起捡落叶", "一起幻想", "一起练瑜伽", "一起玩狼人杀",
+    // "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去", "一起玩剧本杀", "一起吐泡泡", "一起小溪里摸鱼", "一起吹蒲公英", "一起喂鸽子",
+    // "一起看云朵", "一起闻花香", "一起哭", "一起闹", "一起许愿", "一起过生日", "一起抱抱", "一起蹭头", "一起比心"
 ];
 
 // Resize handling
@@ -607,11 +613,43 @@ function startPoem() {
     setTimeout(startTodoPhase, TOTAL_POEM_TIME);
 }
 
-let placedItems = [];
+// Global state for Todo Phase
+let todoItems = []; // Array of { element, x, y, vx, vy, isDragged, isAbsorbed }
+let sphereRadius = 0;
+let sphereCenter = { x: 0, y: 0 };
+let absorbedCount = 0;
+let totalTodoItems = 0;
+let isSphereActive = false;
+let showingInterval;
+
+let isExploding = false;
 
 function startTodoPhase() {
     currentPhase = 1.5;
-    placedItems = []; // Reset placed items
+    todoItems = [];
+    sphereRadius = 0;
+    absorbedCount = 0;
+    isSphereActive = false;
+    
+    // Check if we should show skip button
+    const now = new Date().getTime();
+    if (now > SPHERE_TARGET_DATE) {
+        skipBtn.classList.remove('hidden');
+    } else {
+        skipBtn.classList.add('hidden');
+        // Check periodically
+        const checkSkipInterval = setInterval(() => {
+            if (currentPhase !== 1.5) {
+                clearInterval(checkSkipInterval);
+                return;
+            }
+            if (new Date().getTime() > SPHERE_TARGET_DATE) {
+                skipBtn.classList.remove('hidden');
+                clearInterval(checkSkipInterval);
+            }
+        }, 1000);
+    }
+    
     // Fade out poem
     poemContainer.classList.add('fade-out');
     setTimeout(() => { poemContainer.style.display = 'none'; }, 1000);
@@ -634,17 +672,24 @@ function startTodoPhase() {
         }
     }
     typeWriter();
+    
+    // Init sphere center
+    sphereCenter = { x: width / 2, y: height / 2 };
+    
+    // Start animation loop for todo items
+    requestAnimationFrame(updateTodoItems);
 }
 
 function startShowingTodoItems() {
     let itemIndex = 0;
     // Create random order
     const shuffledItems = [...TODO_ITEMS].sort(() => Math.random() - 0.5);
+    totalTodoItems = shuffledItems.length;
     
-    const interval = setInterval(() => {
+    showingInterval = setInterval(() => {
         if (itemIndex >= shuffledItems.length) {
-            clearInterval(interval);
-            setTimeout(endTodoPhase, 3000); // Hold for 3s after all done
+            clearInterval(showingInterval);
+            // Don't auto-end phase, wait for interaction
             return;
         }
         createTodoItem(shuffledItems[itemIndex]);
@@ -661,24 +706,18 @@ function createTodoItem(text) {
     const size = 0.8 + Math.random() * 1.0; 
     div.style.fontSize = `${size}rem`;
 
-    // Estimate size (pixels)
-    // 1rem approx 16px (default), but let's assume root font size might vary or just use relative logic
-    // We can assume 1rem = 16 * textScale or just 16 for logic as we need screen coords.
-    // Actually, css pixels match logic pixels.
+    // Estimate size
     const fontSizePx = size * 16; 
-    const itemWidth = text.length * fontSizePx * 1.1; // 1.1 factor for spacing
+    const itemWidth = text.length * fontSizePx * 1.1; 
     const itemHeight = fontSizePx * 1.5;
 
     // Center Exclusion Zone
-    const centerX = width / 2;
-    const centerY = height / 2;
-    // Center text is "我想和你做很多事……" approx 10 chars * 3rem
-    const centerW = 12 * 3 * 16 * 1.2; // ~576px wide
-    const centerH = 3 * 16 * 2; // ~96px high
+    const centerW = 12 * 3 * 16 * 1.2; 
+    const centerH = 3 * 16 * 2; 
     
     const centerRect = {
-        x: centerX - centerW / 2,
-        y: centerY - centerH / 2,
+        x: sphereCenter.x - centerW / 2,
+        y: sphereCenter.y - centerH / 2,
         w: centerW,
         h: centerH
     };
@@ -691,37 +730,529 @@ function createTodoItem(text) {
         x = Math.random() * (width - itemWidth); 
         y = Math.random() * (height - itemHeight); 
         
-        // Define current rect
         const currentRect = { x: x, y: y, w: itemWidth, h: itemHeight };
 
-        // 1. Check center collision
-        if (checkCollision(currentRect, centerRect)) {
+        // 1. Check center collision (only if sphere not active yet)
+        if (!isSphereActive && checkCollision(currentRect, centerRect)) {
             valid = false;
             attempts++;
             continue;
         }
 
         // 2. Check other items collision
-        let overlaps = false;
-        for (let item of placedItems) {
-            if (checkCollision(currentRect, item)) {
-                overlaps = true;
-                break;
-            }
-        }
-
-        if (!overlaps) {
-            valid = true;
-            placedItems.push(currentRect);
-        }
+        // (Simplified: allow slight overlap for density, or strict?)
+        // Let's allow overlap for now to fit all items
+        valid = true; 
         attempts++;
     }
 
-    if (valid) {
-        div.style.left = `${x}px`;
-        div.style.top = `${y}px`;
-        todoContainer.appendChild(div);
+    div.style.left = `${x}px`;
+    div.style.top = `${y}px`;
+    todoContainer.appendChild(div);
+    
+    // Create item object
+    const item = {
+        element: div,
+        x: x,
+        y: y,
+        w: itemWidth,
+        h: itemHeight,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        isDragged: false,
+        isAbsorbed: false,
+        text: text
+    };
+    
+    todoItems.push(item);
+    
+    // Add Drag Events
+    addDragEvents(item);
+}
+
+skipBtn.addEventListener('click', skipTodoPhase);
+
+function skipTodoPhase() {
+    if (currentPhase !== 1.5) return;
+    
+    // Stop adding new items
+    if (showingInterval) clearInterval(showingInterval);
+    
+    // Create remaining items that haven't been shown yet? 
+    // The user said "add all labels to sphere". 
+    // If they are not created yet, we should probably just create and absorb them?
+    // Or just absorb existing ones?
+    // "把所有标签添加到球里去" implies all of them.
+    // If we haven't finished showing them, we should probably just finish the list?
+    // But for simplicity and performance, let's just absorb what is on screen + ensure sphere is created.
+    
+    // Actually, createSphere checks items.
+    // Let's first ensure sphere exists.
+    if (!isSphereActive) {
+        // Find at least one item to start sphere
+        if (todoItems.length > 0) {
+            createSphere([todoItems[0]]);
+        } else {
+             // Edge case: no items yet? Should not happen if waited a bit.
+             // If really no items, we force create one?
+        }
     }
+    
+    // Now absorb all unabsorbed items
+    // We need to clone the array because absorbItem modifies state, but safe to iterate.
+    const unabsorbed = todoItems.filter(i => !i.isAbsorbed);
+    unabsorbed.forEach(item => {
+        // Force absorb without animation delay if possible?
+        // Just call absorbItem
+        absorbItem(item);
+    });
+    
+    // If there were items not yet created (shuffledItems), should we care?
+    // Maybe just proceed.
+    
+    // Hide button
+    skipBtn.classList.add('hidden');
+    
+    // The absorbItem loop will trigger startSphereCountdown when absorbedCount >= totalTodoItems
+    // BUT totalTodoItems was set to shuffledItems.length.
+    // If we stopped early, absorbedCount will never reach totalTodoItems!
+    // We must update totalTodoItems to current length.
+    totalTodoItems = todoItems.length;
+    
+    // Now check completion manually in case we are already done
+    if (absorbedCount >= totalTodoItems) {
+        startSphereCountdown();
+    }
+}
+
+function addDragEvents(item) {
+    const el = item.element;
+    let startX, startY;
+    
+    const onMouseDown = (e) => {
+        if (item.isAbsorbed) return;
+        item.isDragged = true;
+        startX = e.clientX - item.x;
+        startY = e.clientY - item.y;
+        el.style.zIndex = 1000;
+        el.style.cursor = 'grabbing';
+    };
+    
+    const onMouseMove = (e) => {
+        if (!item.isDragged) return;
+        e.preventDefault(); // Prevent text selection
+        item.x = e.clientX - startX;
+        item.y = e.clientY - startY;
+        el.style.left = `${item.x}px`;
+        el.style.top = `${item.y}px`;
+        
+        checkDragCollision(item);
+    };
+    
+    const onMouseUp = () => {
+        if (!item.isDragged) return;
+        item.isDragged = false;
+        el.style.zIndex = '';
+        el.style.cursor = 'grab';
+    };
+    
+    el.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    
+    // Touch support
+    el.addEventListener('touchstart', (e) => {
+        if (item.isAbsorbed) return;
+        const touch = e.touches[0];
+        onMouseDown(touch);
+    }, {passive: false});
+    window.addEventListener('touchmove', (e) => {
+        if (!item.isDragged) return;
+        const touch = e.touches[0];
+        onMouseMove(touch);
+    }, {passive: false});
+    window.addEventListener('touchend', onMouseUp);
+}
+
+function checkDragCollision(draggedItem) {
+    // Check against other items
+    for (let other of todoItems) {
+        if (other === draggedItem || other.isAbsorbed) continue;
+        
+        if (isColliding(draggedItem, other)) {
+            // Merge!
+            createSphere([draggedItem, other]);
+            return;
+        }
+    }
+    
+    // Check against sphere
+    if (isSphereActive) {
+        const dx = (draggedItem.x + draggedItem.w/2) - sphereCenter.x;
+        const dy = (draggedItem.y + draggedItem.h/2) - sphereCenter.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist < sphereRadius + 50) { // Tolerance
+            absorbItem(draggedItem);
+        }
+    }
+}
+
+function isColliding(a, b) {
+    return !(
+        a.x + a.w < b.x ||
+        a.x > b.x + b.w ||
+        a.y + a.h < b.y ||
+        a.y > b.y + b.h
+    );
+}
+
+function createSphere(items) {
+    if (isSphereActive) return; // Already created
+    
+    isSphereActive = true;
+    sphereRadius = 100; // Initial radius
+    
+    // Hide center text
+    todoCenterText.style.display = 'none';
+    
+    // Create Sphere Visual (CSS)
+    const sphereDiv = document.createElement('div');
+    sphereDiv.id = 'todo-sphere';
+    sphereDiv.style.width = `${sphereRadius * 2}px`;
+    sphereDiv.style.height = `${sphereRadius * 2}px`;
+    sphereDiv.style.position = 'absolute';
+    sphereDiv.style.left = '50%';
+    sphereDiv.style.top = '50%';
+    sphereDiv.style.transform = 'translate(-50%, -50%)';
+    sphereDiv.style.borderRadius = '50%';
+    sphereDiv.style.background = 'radial-gradient(circle, rgba(255,100,100,0.3) 0%, rgba(255,0,0,0.1) 70%, transparent 100%)';
+    sphereDiv.style.boxShadow = '0 0 50px rgba(255, 50, 50, 0.4)';
+    sphereDiv.style.zIndex = 10; // Lower z-index than unabsorbed items (which default to auto or higher on drag)
+    sphereDiv.style.transition = 'width 0.3s, height 0.3s';
+    todoContainer.appendChild(sphereDiv);
+    
+    // Create Countdown element for later
+    const sphereCountdown = document.createElement('div');
+    sphereCountdown.id = 'sphere-countdown';
+    sphereCountdown.style.position = 'absolute';
+    sphereCountdown.style.left = '50%';
+    sphereCountdown.style.transform = 'translateX(-50%)';
+    sphereCountdown.style.top = 'calc(50% + 120px)'; // Below sphere initially
+    sphereCountdown.style.fontFamily = "'Ma Shan Zheng', cursive";
+    sphereCountdown.style.fontSize = '3rem';
+    sphereCountdown.style.color = '#fff';
+    sphereCountdown.style.textShadow = '0 0 10px rgba(255,255,255,0.8)';
+    sphereCountdown.style.zIndex = 20;
+    sphereCountdown.style.display = 'none';
+    todoContainer.appendChild(sphereCountdown);
+    
+    items.forEach(item => absorbItem(item));
+}
+
+function absorbItem(item) {
+    if (item.isAbsorbed) return;
+    item.isAbsorbed = true;
+    item.isDragged = false;
+    absorbedCount++;
+    
+    // Update visual style
+    item.element.style.transition = 'all 0.5s ease';
+    item.element.classList.add('absorbed');
+    // Ensure absorbed items are inside/above sphere but controlled
+    item.element.style.zIndex = 15; 
+    
+    // Increase sphere size
+    // Calculate new radius based on volume? Or just linear?
+    // Volume of sphere ~ N items. Radius ~ cbrt(N)
+    // Let's use a smoother growth
+    const targetRadius = 150 + Math.sqrt(absorbedCount) * 25; // Base 150, grow with sqrt
+    sphereRadius = targetRadius;
+    
+    const sphereDiv = document.getElementById('todo-sphere');
+    const sphereCountdown = document.getElementById('sphere-countdown');
+    
+    if (sphereDiv) {
+        sphereDiv.style.width = `${sphereRadius * 2}px`;
+        sphereDiv.style.height = `${sphereRadius * 2}px`;
+        // Update countdown position as sphere grows
+        if (sphereCountdown) {
+             sphereCountdown.style.top = `calc(50% + ${sphereRadius + 40}px)`;
+        }
+    }
+    
+    // Check completion
+    if (absorbedCount >= totalTodoItems) {
+        startSphereCountdown();
+    }
+}
+
+function startSphereCountdown() {
+    const sphereCountdown = document.getElementById('sphere-countdown');
+    if (!sphereCountdown) return;
+    
+    sphereCountdown.style.display = 'block';
+    
+    let timerInterval;
+
+    // Countdown logic similar to home page
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = SPHERE_TARGET_DATE - now;
+        
+        if (distance <= 0) {
+            // Reached target!
+            sphereCountdown.innerText = "00天 00时 00分 00秒";
+            if (timerInterval) clearInterval(timerInterval);
+            explodeSphere();
+            return true; // Finished
+        }
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        sphereCountdown.innerText = `${days.toString().padStart(2, '0')}天 ${hours.toString().padStart(2, '0')}时 ${minutes.toString().padStart(2, '0')}分 ${seconds.toString().padStart(2, '0')}秒`;
+        return false; // Not finished
+    };
+    
+    // Only start interval if not immediately finished
+    if (!updateTimer()) {
+        timerInterval = setInterval(updateTimer, 100);
+    }
+}
+
+function explodeSphere() {
+    // Set exploding state
+    isExploding = true;
+    
+    // Hide sphere background only
+    const sphereDiv = document.getElementById('todo-sphere');
+    const sphereCountdown = document.getElementById('sphere-countdown');
+    if(sphereDiv) sphereDiv.style.opacity = 0;
+    if(sphereCountdown) sphereCountdown.style.opacity = 0;
+    
+    // Create explosion effect (particles)
+    // Use center of sphere
+    const cx = width / 2;
+    const cy = height / 2;
+    
+    // Add explosion particles
+    for(let i=0; i<300; i++) {
+        sparks.push(new Spark(cx, cy, `hsl(${Math.random()*60 + 30}, 100%, 70%)`));
+    }
+    
+    // Assign explosion velocities to items
+    const center = { x: width/2, y: height/2 };
+    
+    todoItems.forEach(item => {
+        if (!item.isAbsorbed) return;
+        
+        // Calculate vector from center
+        const dx = (item.x + item.w/2) - center.x;
+        const dy = (item.y + item.h/2) - center.y;
+        const angle = Math.atan2(dy, dx);
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        // Explosion speed based on distance from center (inner items faster or slower? Random mixed)
+        const speed = 15 + Math.random() * 20;
+        
+        item.vx = Math.cos(angle) * speed;
+        item.vy = Math.sin(angle) * speed;
+        
+        // Add some rotation spin
+        item.rot = 0;
+        item.rotSpeed = (Math.random() - 0.5) * 0.5;
+    });
+    
+    // Add some sparks for effect
+    // Moved to top for visual sync
+    /*
+    for(let i=0; i<100; i++) {
+        sparks.push(new Spark(center.x, center.y, `hsl(${Math.random()*60 + 30}, 100%, 70%)`));
+    }
+    */
+    
+    // Transition to 2026 Celebration directly
+    setTimeout(() => {
+        todoContainer.style.display = 'none';
+        startCountdown();
+    }, 4000); // Wait 4 seconds for items to fly off screen
+}
+
+function updateTodoItems() {
+    if (currentPhase !== 1.5) return;
+    
+    // Handle Explosion Phase
+    if (isExploding) {
+        todoItems.forEach(item => {
+            if (!item.isAbsorbed) return;
+            
+            item.x += item.vx;
+            item.y += item.vy;
+            item.vy += 0.2; // Gravity
+            item.rot += item.rotSpeed;
+            
+            item.element.style.left = `${item.x}px`;
+            item.element.style.top = `${item.y}px`;
+            item.element.style.transform = `rotate(${item.rot}rad) scale(1)`;
+            item.element.style.opacity = parseFloat(item.element.style.opacity || 1) - 0.005; // Slower fade out
+        });
+        
+        requestAnimationFrame(updateTodoItems);
+        return;
+    }
+    
+    // Fibonacci Sphere Algorithm for uniform distribution
+    // We want to map absorbed items to points on the sphere surface (or volume)
+    // Surface distribution is cleaner for text.
+    
+    const absorbedItems = todoItems.filter(i => i.isAbsorbed);
+    const count = absorbedItems.length;
+    const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle
+    
+    // Rotating the whole sphere
+    const time = Date.now() * 0.0005; 
+    const rotX = time;
+    const rotY = time * 0.6;
+    
+    absorbedItems.forEach((item, i) => {
+        // Calculate Fibonacci point on unit sphere
+        const y = 1 - (i / (count - 1)) * 2; // y goes from 1 to -1
+        const radiusAtY = Math.sqrt(1 - y * y); // Radius at y
+        
+        const theta = phi * i; // Golden angle increment
+        
+        const x = Math.cos(theta) * radiusAtY;
+        const z = Math.sin(theta) * radiusAtY;
+        
+        // Scale by current sphere radius
+        // We put them *inside* the sphere, so maybe 0.8 * radius
+        const r = sphereRadius * 0.8;
+        
+        let pX = x * r;
+        let pY = y * r;
+        let pZ = z * r;
+        
+        // Apply Rotation (Euler angles)
+        // Rotate around Y axis
+        let x1 = pX * Math.cos(rotY) - pZ * Math.sin(rotY);
+        let z1 = pX * Math.sin(rotY) + pZ * Math.cos(rotY);
+        let y1 = pY;
+        
+        // Rotate around X axis
+        let y2 = y1 * Math.cos(rotX) - z1 * Math.sin(rotX);
+        let z2 = y1 * Math.sin(rotX) + z1 * Math.cos(rotX);
+        let x2 = x1;
+        
+        // Project to 2D (Perspective)
+        // Simple scale based on Z
+        const scale = (z2 + sphereRadius * 2) / (sphereRadius * 2); // Simple depth scale
+        const alpha = Math.max(0.3, Math.min(1, (z2 + r) / (2 * r))); // Fade back items
+        
+        // Set position relative to center
+        item.element.style.left = `${sphereCenter.x + x2 - item.w/2}px`;
+        item.element.style.top = `${sphereCenter.y + y2 - item.h/2}px`;
+        
+        // Scale text for 3D effect
+        item.element.style.transform = `scale(${0.5 + 0.5 * scale})`;
+        item.element.style.opacity = alpha;
+        item.element.style.zIndex = Math.floor(z2 + r); // Z-sorting
+    });
+    
+    // Handle unabsorbed items (Repulsion)
+    const unabsorbed = todoItems.filter(i => !i.isAbsorbed && !i.isDragged);
+    
+    // 1. Sphere Repulsion
+    if (isSphereActive) {
+        unabsorbed.forEach(item => {
+            const cx = item.x + item.w / 2;
+            const cy = item.y + item.h / 2;
+            const dx = cx - sphereCenter.x;
+            const dy = cy - sphereCenter.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // Approximate item radius (half diagonal)
+            const itemRadius = Math.sqrt(item.w * item.w + item.h * item.h) / 2;
+            const minDist = sphereRadius + itemRadius + 20; // 20px buffer
+            
+            if (dist < minDist) {
+                let nx = dx / dist;
+                let ny = dy / dist;
+                if (dist === 0) { nx = 1; ny = 0; } // Degenerate case
+                
+                // Push out (Softly)
+                const pushDist = (minDist - dist) * 0.1; // Reduced from 1.0 to 0.1 to prevent jitter
+                item.x += nx * pushDist;
+                item.y += ny * pushDist;
+            }
+        });
+    }
+
+    // 2. Item-Item Repulsion (Relaxation)
+    // Run a few iterations for stability
+    for (let iter = 0; iter < 3; iter++) {
+        for (let i = 0; i < unabsorbed.length; i++) {
+            for (let j = i + 1; j < unabsorbed.length; j++) {
+                const a = unabsorbed[i];
+                const b = unabsorbed[j];
+                
+                // Use existing checkCollision which includes padding
+                if (checkCollision(a, b)) {
+                    // Resolve overlap
+                    // Calculate centers
+                    const acx = a.x + a.w/2;
+                    const acy = a.y + a.h/2;
+                    const bcx = b.x + b.w/2;
+                    const bcy = b.y + b.h/2;
+                    
+                    const dx = acx - bcx;
+                    const dy = acy - bcy;
+                    
+                    // Determine overlap amount
+                    // Use padding from checkCollision (10 total, so 5 per side)
+                    const padding = 10;
+                    const halfW_A = a.w / 2 + padding / 2;
+                    const halfW_B = b.w / 2 + padding / 2;
+                    const halfH_A = a.h / 2 + padding / 2;
+                    const halfH_B = b.h / 2 + padding / 2;
+                    
+                    const overlapX = (halfW_A + halfW_B) - Math.abs(dx);
+                    const overlapY = (halfH_A + halfH_B) - Math.abs(dy);
+                    
+                    if (overlapX > 0 && overlapY > 0) {
+                        if (overlapX < overlapY) {
+                            // Resolve X (Softly)
+                            const sign = dx > 0 ? 1 : -1;
+                            const move = overlapX * 0.05; // Reduced from 0.5 to 0.05
+                            a.x += sign * move;
+                            b.x -= sign * move;
+                        } else {
+                            // Resolve Y (Softly)
+                            const sign = dy > 0 ? 1 : -1;
+                            const move = overlapY * 0.05;
+                            a.y += sign * move;
+                            b.y -= sign * move;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // 3. Update DOM and Bounds
+    unabsorbed.forEach(item => {
+        // Keep within bounds
+        item.x = Math.max(0, Math.min(width - item.w, item.x));
+        item.y = Math.max(0, Math.min(height - item.h, item.y));
+        
+        // Apply to DOM
+        item.element.style.left = `${item.x}px`;
+        item.element.style.top = `${item.y}px`;
+    });
+    
+    requestAnimationFrame(updateTodoItems);
 }
 
 function checkCollision(r1, r2) {
@@ -769,7 +1300,7 @@ function startCountdown() {
             createTextParticles(count.toString(), 300); // Increased size from 150 to 300
         } else {
             clearInterval(interval);
-            startSpherePhase();
+            startCelebration();
         }
     }, 1000);
 }
@@ -930,13 +1461,14 @@ function animate() {
                 fireworks.splice(i, 1);
             }
         }
+    }
 
-        for (let i = sparks.length - 1; i >= 0; i--) {
-            sparks[i].update();
-            sparks[i].draw();
-            if (sparks[i].alpha <= 0) {
-                sparks.splice(i, 1);
-            }
+    // Draw Sparks (Global - for explosions in any phase)
+    for (let i = sparks.length - 1; i >= 0; i--) {
+        sparks[i].update();
+        sparks[i].draw();
+        if (sparks[i].alpha <= 0) {
+            sparks.splice(i, 1);
         }
     }
 }
@@ -1073,6 +1605,10 @@ function checkAnswer() {
     if (answer === "小蓉蓉") {
         errorMsg.style.color = "#4dff4d"; // Green
         errorMsg.innerText = "这也太聪明了吧";
+        
+        // Immediately hide start-btn to prevent flash
+        startBtn.classList.add('hidden');
+        
         setTimeout(() => {
             questionModal.classList.add('hidden');
             // Play Audio

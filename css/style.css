@@ -153,6 +153,40 @@ body {
     white-space: nowrap;
     animation: fadeInTodo 1.5s ease forwards;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    cursor: grab; /* Enable grab cursor */
+    user-select: none; /* Prevent text selection */
+    touch-action: none; /* Prevent touch scrolling while dragging */
+}
+
+.todo-item:active {
+    cursor: grabbing;
+}
+
+#skip-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Noto Serif SC', serif;
+    z-index: 100;
+    transition: all 0.3s;
+}
+
+#skip-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.todo-item.absorbed {
+    animation: none;
+    opacity: 0.8;
+    color: #ffd700; /* Gold color for absorbed items */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+    pointer-events: none; /* Disable interaction once absorbed */
 }
 
 @keyframes fadeInTodo {
@@ -185,11 +219,12 @@ body {
 }
 
 #countdown-timer {
-    font-size: 5rem; /* Increased from 2.5rem to 5rem (2x) */
+    font-size: 8rem; /* Increased from 4rem to 8rem (doubled) */
     font-weight: bold;
-    font-family: 'Ma Shan Zheng', cursive;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-    letter-spacing: 1px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    font-family: 'Ma Shan Zheng', cursive; /* Changed font to artistic style */
+    margin-bottom: 20px;
 }
 
 /* Disclaimer Modal Styles */
@@ -213,7 +248,7 @@ body {
     padding: 40px;
     border-radius: 10px;
     width: 90%;
-    max-width: 800px;
+    max-width: 1000px; /* Increased from 800px */
     max-height: 90vh;
     overflow-y: auto;
     color: #fff;
