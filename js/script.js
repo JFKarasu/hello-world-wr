@@ -46,7 +46,7 @@ const CANCER = {
 // --- Countdown Logic ---
 // 目标时间：2026年除夕（2026年2月16日）的24点，即2026年2月17日0点
 // 注意：JavaScript中月份是从0开始的，所以2月是1
-const TARGET_DATE = new Date(2026, 1, 9, 17, 35, 0).getTime();
+const TARGET_DATE = new Date(2026, 1, 17, 0, 0, 0).getTime();
 const SPHERE_TARGET_DATE = TARGET_DATE - 10000; // 10 seconds before target
 
 function updateCountdown() {
