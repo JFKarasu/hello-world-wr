@@ -219,11 +219,11 @@ body {
 }
 
 #countdown-timer {
-    font-size: 8rem; /* Increased from 4rem to 8rem (doubled) */
+    font-size: 16rem; /* Increased from 8rem to 16rem (doubled again) */
     font-weight: bold;
     color: #fff;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    font-family: 'Ma Shan Zheng', cursive; /* Changed font to artistic style */
+    font-family: 'Ma Shan Zheng', cursive;
     margin-bottom: 20px;
 }
 

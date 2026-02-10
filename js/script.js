@@ -7,6 +7,7 @@ const todoContainer = document.getElementById('todo-container');
 const todoCenterText = document.getElementById('todo-center-text');
 const skipBtn = document.getElementById('skip-btn');
 const bgm = document.getElementById('bgm');
+const fireworksBgm = document.getElementById('fireworks-bgm');
 
 let width, height;
 let particles = [];
@@ -185,15 +186,15 @@ function getNextBlessing() {
 
 const TODO_ITEMS = [
     "一起露营", "一起看日出", "一起堆雪人", "一起拼乐高", "一起放烟花", "一起做早餐", "一起打羽毛球", "一起吹晚风", "一起去鬼屋", "一起种盆栽",
-    // "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
-    // "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
-    // "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起溜冰",
-    // "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
-    // "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
-    // "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
-    // "一起挖沙子", "一起窜巷子", "一起跑步", "一起踩水坑", "一起坐船", "一起晒太阳", "一起捡落叶", "一起幻想", "一起练瑜伽", "一起玩狼人杀",
-    // "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去", "一起玩剧本杀", "一起吐泡泡", "一起小溪里摸鱼", "一起吹蒲公英", "一起喂鸽子",
-    // "一起看云朵", "一起闻花香", "一起哭", "一起闹", "一起许愿", "一起过生日", "一起抱抱", "一起蹭头", "一起比心"
+    "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
+    "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
+    "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起溜冰",
+    "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
+    "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
+    "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
+    "一起挖沙子", "一起窜巷子", "一起跑步", "一起踩水坑", "一起坐船", "一起晒太阳", "一起捡落叶", "一起幻想", "一起练瑜伽", "一起玩狼人杀",
+    "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去", "一起玩剧本杀", "一起吐泡泡", "一起小溪里摸鱼", "一起吹蒲公英", "一起喂鸽子",
+    "一起看云朵", "一起闻花香", "一起哭", "一起闹", "一起许愿", "一起过生日", "一起抱抱", "一起蹭头", "一起比心"
 ];
 
 // Resize handling
@@ -1075,10 +1076,40 @@ function explodeSphere() {
     */
     
     // Transition to 2026 Celebration directly
+    
+    // Gather Effect (Shrink)
+    setTimeout(() => {
+        gatherParticlesToCenter();
+    }, 2000);
+
+    // Bloom into Countdown
     setTimeout(() => {
         todoContainer.style.display = 'none';
         startCountdown();
     }, 4000); // Wait 4 seconds for items to fly off screen
+}
+
+function gatherParticlesToCenter() {
+    // Ensure we have particles
+    const particleCount = 800;
+    if (particles.length < particleCount) {
+         const toAdd = particleCount - particles.length;
+         for(let i=0; i<toAdd; i++) {
+             // Spawn random or from edge
+             particles.push(new Particle(Math.random()*width, Math.random()*height));
+         }
+    }
+    
+    // Set targets to center
+    const cx = width / 2;
+    const cy = height / 2;
+    particles.forEach(p => {
+         p.tx = cx;
+         p.ty = cy;
+         // p.ease = 0.05; // Default ease
+         // Increase randomness in ease for organic gather
+         p.ease = 0.04 + Math.random() * 0.04;
+    });
 }
 
 function updateTodoItems() {
@@ -1284,7 +1315,8 @@ function startQuestionPhase() {
     createTextParticles("亲爱的宝贝\n让我们一起迎接新的一年吧", 60);
 
     // Schedule Countdown
-    setTimeout(startCountdown, 6000);
+    setTimeout(gatherParticlesToCenter, 4500); // Shrink text to center
+    setTimeout(startCountdown, 6000); // Bloom to numbers
 }
 
 function startCountdown() {
@@ -1390,6 +1422,15 @@ function initScrollingMessages() {
 
 function startCelebration() {
     currentPhase = 4;
+    
+    // Switch BGM
+    // User requested BGM to keep playing
+    // if (bgm) bgm.pause(); 
+    if (fireworksBgm) {
+        fireworksBgm.currentTime = 0;
+        fireworksBgm.play().catch(e => console.error("Fireworks BGM play failed:", e));
+    }
+
     createTextParticles("你好 2026", 120);
     initScrollingMessages();
 }
@@ -1423,8 +1464,8 @@ function animate() {
         meteor.draw();
     });
 
-    // Draw Text Particles (Phases 2, 3, 4)
-    if (currentPhase >= 2) {
+    // Draw Text Particles (Phases 1.5, 2, 3, 4)
+    if (currentPhase >= 1.5) {
         particles.forEach(p => {
             p.update();
             p.draw();
@@ -1537,25 +1578,25 @@ const VIDEO_FILES = [
 
 // Helper to find videos (Simulation since we can't ls in browser JS without backend list)
 // We will use a placeholder list. User should populate this.
-const AVAILABLE_VIDEOS = [
-    "1.mp4", "2.mp4"
-]; 
+const AVAILABLE_VIDEOS = Array.from({length: 12}, (_, i) => `${i + 1}.mp4`);
 
 function playRandomVideo() {
     const videoFile = AVAILABLE_VIDEOS[Math.floor(Math.random() * AVAILABLE_VIDEOS.length)];
     const videoPath = `assets/video/${videoFile}`;
     
     popupVideo.src = videoPath;
+    popupVideo.muted = true; // Default muted
     videoOverlay.classList.remove('hidden');
     videoOverlay.style.display = 'flex'; // Ensure flex display
     
     popupVideo.play().catch(e => {
         console.error("Video play error:", e);
-        alert("视频无法播放，请检查 assets/video 目录下是否有视频文件 (1.mp4, 2.mp4 等)");
+        alert("视频无法播放，请检查 assets/video 目录下是否有视频文件 (1.mp4 ... 12.mp4)");
     });
     
-    // Pause BGM
-    bgm.pause();
+    // Don't pause BGM since video is muted
+    // bgm.pause();
+    // if (fireworksBgm) fireworksBgm.pause(); 
 }
 
 closeVideoBtn.addEventListener('click', () => {
@@ -1563,15 +1604,13 @@ closeVideoBtn.addEventListener('click', () => {
     videoOverlay.style.display = 'none';
     popupVideo.pause();
     popupVideo.currentTime = 0;
-    // Resume BGM
-    bgm.play();
+    // No need to resume as we didn't pause
 });
 
 popupVideo.addEventListener('ended', () => {
     videoOverlay.classList.add('hidden');
     videoOverlay.style.display = 'none';
-    // Resume BGM
-    bgm.play();
+    // No need to resume as we didn't pause
 });
 
 const questionModal = document.getElementById('question-modal');
@@ -1584,15 +1623,17 @@ const agreeBtn = document.getElementById('agree-btn');
 let wrongAttempts = 0;
 
 startBtn.addEventListener('click', () => {
-    // Show Disclaimer Modal first
-    disclaimerModal.classList.remove('hidden');
+    // Show Question Modal first
+    questionModal.classList.remove('hidden');
+    answerInput.focus();
 });
 
 agreeBtn.addEventListener('click', () => {
     disclaimerModal.classList.add('hidden');
-    // Show Question Modal after agreeing
-    questionModal.classList.remove('hidden');
-    answerInput.focus();
+    // Start Sequence after agreeing
+    // Play Audio
+    bgm.play().catch(e => console.log("Audio play failed (interaction required)", e));
+    startPoem();
 });
 
 submitAnswerBtn.addEventListener('click', checkAnswer);
@@ -1611,10 +1652,11 @@ function checkAnswer() {
         
         setTimeout(() => {
             questionModal.classList.add('hidden');
-            // Play Audio
-            bgm.play().catch(e => console.log("Audio play failed (interaction required)", e));
-            // Start Sequence
-            startPoem();
+            // Show Disclaimer Modal after answering correctly
+            disclaimerModal.classList.remove('hidden');
+            // Reset scroll to top
+            const content = disclaimerModal.querySelector('.disclaimer-content');
+            if (content) content.scrollTop = 0;
         }, 1000);
     } else {
         wrongAttempts++;
