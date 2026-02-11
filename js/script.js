@@ -47,34 +47,50 @@ const CANCER = {
 // --- Countdown Logic ---
 // 目标时间：2026年除夕（2026年2月16日）的24点，即2026年2月17日0点
 // 注意：JavaScript中月份是从0开始的，所以2月是1
-const TARGET_DATE = new Date(2026, 1, 17, 0, 0, 0).getTime();
-const SPHERE_TARGET_DATE = TARGET_DATE - 10000; // 10 seconds before target
+const TARGET_DATE = new Date(2026, 1, 11, 14, 0, 0).getTime();
+const SPHERE_TARGET_DATE = TARGET_DATE - 17000; // 17 seconds before target to allow for 4s text + 2.5s transition + 10s final countdown
 
 function updateCountdown() {
-    if (currentPhase !== 0) return; // Stop updating if not in idle phase
-
     const currentTime = new Date().getTime();
     const distance = TARGET_DATE - currentTime;
+    
+    // Auto-Jump Check (Global)
+    // If within 15 seconds of target (and not already in countdown sequence)
+    // We force jump to ensure the final countdown happens.
+    // 15000ms is exactly enough for 4s text + 10s countdown + 1s buffer.
+    // We check a small window to trigger it once.
+    // User requested: Only jump if in Wish Sphere phase (1.5)
+    if (distance <= 15000 && distance > 14000 && currentPhase === 1.5) {
+        forceJumpToCountdown();
+    }
+
+    if (currentPhase !== 0) return; // Stop updating DOM if not in idle phase
     
     const countdownContainer = document.getElementById('countdown-container');
     const startBtn = document.getElementById('start-btn');
     const timerElement = document.getElementById('countdown-timer');
 
-    // 5 minutes in milliseconds
-    const FIVE_MINUTES = 10 * 60 * 1000;
+    // 10 minutes in milliseconds
+    const TEN_MINUTES = 10 * 60 * 1000;
+    
+    // We want the countdown to reach 0 when the button appears (10 mins before target).
+    // So we display the time remaining until (TARGET_DATE - 10 minutes).
+    // This removes the "extra 10 minutes" from the display.
+    const timeUntilStart = distance - TEN_MINUTES;
 
-    // Show button if time is within 5 minutes or already passed
-    if (distance < FIVE_MINUTES) {
+    // Show button if time is within 10 minutes or already passed
+    if (distance < TEN_MINUTES) {
         countdownContainer.style.display = 'none';
         startBtn.classList.remove('hidden');
     } else {
         countdownContainer.style.display = 'block';
         startBtn.classList.add('hidden');
         
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        // Calculate based on timeUntilStart instead of distance
+        const days = Math.floor(timeUntilStart / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeUntilStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeUntilStart % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeUntilStart % (1000 * 60)) / 1000);
         
         timerElement.innerText = `${days.toString().padStart(2, '0')}天 ${hours.toString().padStart(2, '0')}时 ${minutes.toString().padStart(2, '0')}分 ${seconds.toString().padStart(2, '0')}秒`;
     }
@@ -166,6 +182,8 @@ const BLESSINGS = [
     "每一步前行，都值得被肯定，你真的很努力",
     "愿你放下疲惫，好好休息，一切都会慢慢变好",
     "好好爱自己，比什么都重要",
+
+    
 ];
 
 // Shared pool for non-repeating random selection
@@ -186,24 +204,28 @@ function getNextBlessing() {
 
 const TODO_ITEMS = [
     "一起露营", "一起看日出", "一起堆雪人", "一起拼乐高", "一起放烟花", "一起做早餐", "一起打羽毛球", "一起吹晚风", "一起去鬼屋", "一起种盆栽",
-    "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
-    "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
-    "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起溜冰",
-    "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
-    "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
-    "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
-    "一起挖沙子", "一起窜巷子", "一起跑步", "一起踩水坑", "一起坐船", "一起晒太阳", "一起捡落叶", "一起幻想", "一起练瑜伽", "一起玩狼人杀",
-    "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去", "一起玩剧本杀", "一起吐泡泡", "一起小溪里摸鱼", "一起吹蒲公英", "一起喂鸽子",
-    "一起看云朵", "一起闻花香", "一起哭", "一起闹", "一起许愿", "一起过生日", "一起抱抱", "一起蹭头", "一起比心"
+    // "一起滑雪", "一起压马路", "一起养小猫", "一起喂小狗", "一起旅行", "一起做午餐", "一起相拥而眠", "一起手牵手", "一起看樱花", "一起刷碗",
+    // "一起看电影", "一起等日落", "一起逛公园", "一起吃火锅", "一起逛超市", "一起做晚餐", "一起做手工", "一起跨年", "一起去动物园", "一起拍情侣照",
+    // "一起骑单车", "一起爬山", "一起听雨声", "一起等日落", "一起散步", "一起吃夜宵", "一起唱歌", "一起看球赛", "一起去海底世界", "一起溜冰",
+    // "一起踩沙滩", "一起赖被窝", "一起唠家常", "一起煮热汤", "一起捡贝壳", "一起旅游", "一起做爱做的事", "一起去寺庙祈福", "一起摘水果", "一起穿情侣服",
+    // "一起坐公交", "一起伸懒腰", "一起喝奶茶", "一起写信", "一起看星星", "一起打伞", "一起发疯", "一起抓娃娃", "一起钓鱼", "一起晨跑",
+    // "一起拆盲盒", "一起做蛋糕", "一起听老歌", "一起逛书店", "一起打游戏", "一起弹钢琴", "一起去游乐园", "一起看恐怖片", "一起挖雨花石", "一起回忆过去",
+    // "一起挖沙子", "一起窜巷子", "一起跑步", "一起踩水坑", "一起坐船", "一起晒太阳", "一起捡落叶", "一起幻想", "一起练瑜伽", "一起玩狼人杀",
+    // "一起坐飞机", "一起逛夜市", "一起吐槽", "一起烤肉", "一起走下去", "一起玩剧本杀", "一起吐泡泡", "一起小溪里摸鱼", "一起吹蒲公英", "一起喂鸽子",
+    // "一起看云朵", "一起闻花香", "一起哭", "一起闹", "一起许愿", "一起过生日", "一起抱抱", "一起蹭头", "一起比心"
 ];
 
 // Resize handling
 function resize() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-    // Recalculate text scale based on width
-    textScale = Math.min(width / 800, 1);
+    // Recalculate text scale based on width AND height (for landscape mobile)
+    // Base width 800, Base height 600 (approx)
+    textScale = Math.min(width / 800, height / 600, 1);
     
+    // Reset stars on resize to cover new area
+    stars.forEach(star => star.reset());
+
     // Re-init scrolling messages to fit new height
     if (currentPhase === 4) {
         initScrollingMessages();
@@ -356,16 +378,24 @@ class Meteor {
 
 class Star {
     constructor() {
+        this.reset();
+    }
+    
+    reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.size = Math.random() * 1.5;
-        this.opacity = Math.random();
-        this.speed = Math.random() * 0.05;
+        // Smaller, more realistic stars
+        this.size = Math.random() * 1.2 + 0.1; 
+        this.opacity = Math.random() * 0.8 + 0.2;
+        // Different twinkle speeds
+        this.twinkleSpeed = (Math.random() - 0.5) * 0.02;
     }
+
     update() {
-        this.opacity += (Math.random() - 0.5) * 0.1;
-        if (this.opacity < 0) this.opacity = 0;
-        if (this.opacity > 1) this.opacity = 1;
+        this.opacity += this.twinkleSpeed;
+        if (this.opacity < 0.2 || this.opacity > 1) {
+            this.twinkleSpeed = -this.twinkleSpeed;
+        }
     }
     draw() {
         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
@@ -515,7 +545,8 @@ class Spark {
 // --- Logic ---
 
 function initStars() {
-    for (let i = 0; i < 200; i++) {
+    // Increase star count for better density
+    for (let i = 0; i < 400; i++) {
         stars.push(new Star());
     }
     // Init Meteors
@@ -839,11 +870,17 @@ function addDragEvents(item) {
         el.style.cursor = 'grabbing';
     };
     
-    const onMouseMove = (e) => {
+    const onMouseMove = (eOrTouch) => {
         if (!item.isDragged) return;
-        e.preventDefault(); // Prevent text selection
-        item.x = e.clientX - startX;
-        item.y = e.clientY - startY;
+        // Check if preventDefault exists (it does on MouseEvent, not on Touch object)
+        if (eOrTouch.preventDefault) eOrTouch.preventDefault(); 
+        
+        // Handle both MouseEvent and Touch object (which has clientX directly)
+        const clientX = eOrTouch.clientX;
+        const clientY = eOrTouch.clientY;
+        
+        item.x = clientX - startX;
+        item.y = clientY - startY;
         el.style.left = `${item.x}px`;
         el.style.top = `${item.y}px`;
         
@@ -864,11 +901,15 @@ function addDragEvents(item) {
     // Touch support
     el.addEventListener('touchstart', (e) => {
         if (item.isAbsorbed) return;
+        // e.preventDefault(); // Don't prevent default here to allow click? But we need to prevent scroll
+        // Actually style.css has touch-action: none, so scroll is prevented.
         const touch = e.touches[0];
         onMouseDown(touch);
     }, {passive: false});
+    
     window.addEventListener('touchmove', (e) => {
         if (!item.isDragged) return;
+        e.preventDefault(); // Prevent scroll explicitly
         const touch = e.touches[0];
         onMouseMove(touch);
     }, {passive: false});
@@ -937,15 +978,18 @@ function createSphere(items) {
     const sphereCountdown = document.createElement('div');
     sphereCountdown.id = 'sphere-countdown';
     sphereCountdown.style.position = 'absolute';
-    sphereCountdown.style.left = '50%';
-    sphereCountdown.style.transform = 'translateX(-50%)';
-    sphereCountdown.style.top = 'calc(50% + 120px)'; // Below sphere initially
+    sphereCountdown.style.left = `calc(50% + ${sphereRadius + 50}px)`; // Right of sphere
+    sphereCountdown.style.top = '50%';
+    sphereCountdown.style.transform = 'translateY(-50%)'; // Vertically centered
     sphereCountdown.style.fontFamily = "'Ma Shan Zheng', cursive";
-    sphereCountdown.style.fontSize = '3rem';
+    sphereCountdown.style.fontSize = '1.2rem'; // Smaller font as requested
     sphereCountdown.style.color = '#fff';
     sphereCountdown.style.textShadow = '0 0 10px rgba(255,255,255,0.8)';
     sphereCountdown.style.zIndex = 20;
     sphereCountdown.style.display = 'none';
+    sphereCountdown.style.width = 'auto'; 
+    sphereCountdown.style.whiteSpace = 'nowrap'; // No wrap
+    sphereCountdown.style.textAlign = 'left';
     todoContainer.appendChild(sphereCountdown);
     
     items.forEach(item => absorbItem(item));
@@ -968,7 +1012,11 @@ function absorbItem(item) {
     // Volume of sphere ~ N items. Radius ~ cbrt(N)
     // Let's use a smoother growth
     const targetRadius = 150 + Math.sqrt(absorbedCount) * 25; // Base 150, grow with sqrt
-    sphereRadius = targetRadius;
+    
+    // Cap radius for mobile/small screens
+    // Keep diameter within 80% of the smallest screen dimension
+    const maxRadius = Math.min(width, height) * 0.4;
+    sphereRadius = Math.min(targetRadius, maxRadius);
     
     const sphereDiv = document.getElementById('todo-sphere');
     const sphereCountdown = document.getElementById('sphere-countdown');
@@ -978,7 +1026,20 @@ function absorbItem(item) {
         sphereDiv.style.height = `${sphereRadius * 2}px`;
         // Update countdown position as sphere grows
         if (sphereCountdown) {
-             sphereCountdown.style.top = `calc(50% + ${sphereRadius + 40}px)`;
+             // Keep it to the right of the sphere
+             // User requested: "Previous countdown should appear to the right"
+             // We prioritize right side unless it's impossible (Mobile Portrait)
+             if (width < height && width < 600) { // Portrait Mobile
+                 sphereCountdown.style.left = '50%';
+                 sphereCountdown.style.top = `calc(50% + ${sphereRadius + 50}px)`;
+                 sphereCountdown.style.transform = 'translateX(-50%)';
+                 sphereCountdown.style.textAlign = 'center';
+             } else {
+                 sphereCountdown.style.left = `calc(50% + ${sphereRadius + 40}px)`;
+                 sphereCountdown.style.top = '50%';
+                 sphereCountdown.style.transform = 'translateY(-50%)';
+                 sphereCountdown.style.textAlign = 'left';
+             }
         }
     }
     
@@ -996,25 +1057,31 @@ function startSphereCountdown() {
     
     let timerInterval;
 
-    // Countdown logic similar to home page
+    // Countdown logic
     const updateTimer = () => {
         const now = new Date().getTime();
-        const distance = SPHERE_TARGET_DATE - now;
+        // Display time to actual 2026 TARGET_DATE
+        // This fixes the "late by 15s" issue by showing the real time remaining
+        const distanceToTarget = TARGET_DATE - now;
         
-        if (distance <= 0) {
-            // Reached target!
-            sphereCountdown.innerText = "00天 00时 00分 00秒";
+        // Internal trigger based on SPHERE_TARGET_DATE (when animation should start)
+        const distanceToTrigger = SPHERE_TARGET_DATE - now;
+        
+        if (distanceToTrigger <= 0) {
+            // Reached animation trigger time!
             if (timerInterval) clearInterval(timerInterval);
             explodeSphere();
             return true; // Finished
         }
         
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        // Format based on distanceToTarget
+        const days = Math.floor(distanceToTarget / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distanceToTarget % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distanceToTarget % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distanceToTarget % (1000 * 60)) / 1000);
         
-        sphereCountdown.innerText = `${days.toString().padStart(2, '0')}天 ${hours.toString().padStart(2, '0')}时 ${minutes.toString().padStart(2, '0')}分 ${seconds.toString().padStart(2, '0')}秒`;
+        // Single line, smaller font, specific prefix
+        sphereCountdown.innerText = `距离2026还剩 ${days.toString().padStart(2, '0')}天 ${hours.toString().padStart(2, '0')}时 ${minutes.toString().padStart(2, '0')}分 ${seconds.toString().padStart(2, '0')}秒`;
         return false; // Not finished
     };
     
@@ -1080,13 +1147,51 @@ function explodeSphere() {
     // Gather Effect (Shrink)
     setTimeout(() => {
         gatherParticlesToCenter();
-    }, 2000);
+    }, 1500); // Reduced from 2000 to 1500
 
     // Bloom into Countdown
     setTimeout(() => {
         todoContainer.style.display = 'none';
+        showPreCountdownMessage();
+    }, 2500); // Reduced from 4000 to 2500 for faster transition
+}
+
+function showPreCountdownMessage() {
+    currentPhase = 2.5; // Transition phase
+    
+    // Show Text
+    // Font size 90 for impact
+    createTextParticles("宝贝，让我们一起迎接2026吧", 90);
+    
+    // Hold for 4 seconds then start countdown
+    setTimeout(() => {
         startCountdown();
-    }, 4000); // Wait 4 seconds for items to fly off screen
+    }, 4000);
+}
+
+function forceJumpToCountdown() {
+    if (currentPhase >= 2.5) return; // Already in transition or later
+    
+    console.log("Force jumping to countdown...");
+    
+    // Hide all overlays
+    if (startScreen) {
+        startScreen.style.opacity = 0;
+        startScreen.style.display = 'none';
+    }
+    if (poemContainer) poemContainer.style.display = 'none';
+    if (todoContainer) todoContainer.style.display = 'none';
+    if (questionModal) questionModal.classList.add('hidden');
+    if (disclaimerModal) disclaimerModal.classList.add('hidden');
+    if (videoOverlay) videoOverlay.classList.add('hidden');
+    
+    // Stop intervals
+    if (showingInterval) clearInterval(showingInterval);
+    
+    // Ensure BGM
+    // if (bgm && bgm.paused) bgm.play().catch(e => console.log("Auto play bgm failed", e));
+    
+    showPreCountdownMessage();
 }
 
 function gatherParticlesToCenter() {
@@ -1324,12 +1429,12 @@ function startCountdown() {
     let count = 10;
     
     // Initial number
-    createTextParticles(count.toString(), 300); // Increased size from 150 to 300
+    createTextParticles(count.toString(), 600); // Increased size from 300 to 600
 
     const interval = setInterval(() => {
         count--;
         if (count > 0) {
-            createTextParticles(count.toString(), 300); // Increased size from 150 to 300
+            createTextParticles(count.toString(), 600); // Increased size from 300 to 600
         } else {
             clearInterval(interval);
             startCelebration();
@@ -1389,7 +1494,15 @@ function initScrollingMessages() {
     scrollingMessages = [];
     const centerY = height / 2;
     // Safe zone around center
-    const safeZone = 220 * textScale; 
+    // Adjust safeZone for mobile (smaller screens)
+    // If height is small, reduce safeZone significantly
+    let safeZone = 220 * textScale;
+    
+    if (height < 500) {
+        safeZone = 60 * textScale; // Much smaller safe zone on landscape mobile
+    } else if (width < 600) {
+        safeZone = 100 * textScale; // Smaller safe zone on portrait mobile
+    }
     
     // Calculate available tracks based on font size + padding
     const fontSize = 32 * textScale; // Updated font size
@@ -1399,7 +1512,8 @@ function initScrollingMessages() {
 
     // Top Tracks
     // From y=50 to centerY-safeZone
-    let currentY = 80;
+    // Ensure at least some margin from top
+    let currentY = 50 * textScale; 
     while (currentY < centerY - safeZone) {
         validY.push(currentY);
         currentY += trackHeight;
@@ -1407,10 +1521,17 @@ function initScrollingMessages() {
 
     // Bottom Tracks
     // From centerY+safeZone to height-50
-    currentY = centerY + safeZone + 50;
-    while (currentY < height - 50) {
+    currentY = centerY + safeZone;
+    // Ensure at least some margin from bottom
+    while (currentY < height - 50 * textScale) {
         validY.push(currentY);
         currentY += trackHeight;
+    }
+    
+    // Fallback: If no tracks fit (extremely small screen), add at least one top and one bottom ignoring safe zone
+    if (validY.length === 0) {
+        validY.push(height * 0.2);
+        validY.push(height * 0.8);
     }
 
     // Create messages for each track
@@ -1431,7 +1552,7 @@ function startCelebration() {
         fireworksBgm.play().catch(e => console.error("Fireworks BGM play failed:", e));
     }
 
-    createTextParticles("你好 2026", 120);
+    createTextParticles("你好 2026\n宝贝 新年快乐", 120);
     initScrollingMessages();
 }
 
@@ -1578,7 +1699,7 @@ const VIDEO_FILES = [
 
 // Helper to find videos (Simulation since we can't ls in browser JS without backend list)
 // We will use a placeholder list. User should populate this.
-const AVAILABLE_VIDEOS = Array.from({length: 12}, (_, i) => `${i + 1}.mp4`);
+const AVAILABLE_VIDEOS = Array.from({length: 15}, (_, i) => `${i + 1}.mp4`);
 
 function playRandomVideo() {
     const videoFile = AVAILABLE_VIDEOS[Math.floor(Math.random() * AVAILABLE_VIDEOS.length)];
@@ -1645,7 +1766,7 @@ function checkAnswer() {
     const answer = answerInput.value.trim();
     if (answer === "小蓉蓉") {
         errorMsg.style.color = "#4dff4d"; // Green
-        errorMsg.innerText = "这也太聪明了吧";
+        errorMsg.innerText = "宝贝你也太聪明了吧";
         
         // Immediately hide start-btn to prevent flash
         startBtn.classList.add('hidden');
@@ -1664,7 +1785,7 @@ function checkAnswer() {
         if (wrongAttempts === 1) {
             errorMsg.innerText = "傻了吧";
         } else if (wrongAttempts === 2) {
-            errorMsg.innerText = "你是个笨蛋吧";
+            errorMsg.innerText = "是个小笨蛋吧";
         } else {
             errorMsg.innerText = "友情提醒三个字";
         }

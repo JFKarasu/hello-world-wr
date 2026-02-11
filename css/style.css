@@ -219,7 +219,7 @@ body {
 }
 
 #countdown-timer {
-    font-size: 16rem; /* Increased from 8rem to 16rem (doubled again) */
+    font-size: 8rem; /* Decreased from 16rem to 8rem */
     font-weight: bold;
     color: #fff;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
@@ -456,4 +456,47 @@ body {
 
 #close-video-btn:hover {
     transform: scale(1.2) rotate(90deg);
+}
+
+/* Mobile Landscape Adaptation */
+@media (max-height: 500px) and (orientation: landscape) {
+    #countdown-timer {
+        font-size: 4rem; /* Smaller for landscape height */
+    }
+    
+    #start-btn {
+        font-size: 1.2rem;
+        padding: 10px 25px;
+    }
+    
+    .disclaimer-content {
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .disclaimer-content h1 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .disclaimer-body {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        padding: 20px;
+        width: 400px; /* Wider for landscape */
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #todo-center-text {
+        font-size: 2rem;
+        padding: 10px;
+    }
+    
+    .poem-line {
+        margin: 8px 0;
+        font-size: 1rem;
+    }
 }
