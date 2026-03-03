@@ -177,7 +177,21 @@ document.addEventListener('DOMContentLoaded', () => {
         sortEntries();
 
         if (entries.length === 0) {
-            const msg = isCloudEnabled 
+            // Add default test data if empty
+            entries = [{
+                id: 'default-test',
+                date: new Date().toISOString().split('T')[0], // Today
+                content: '翻身了，再也不是8块钱的参与奖了，元宵快乐！',
+                image: 'assets/images/yuanxiao.jpg' // Assuming this path is valid relative to index.html
+            }];
+            
+            // Only show message if we decide not to show default data, but user asked for default data.
+            // If we want to persist it, we should save it, but "display a default test data" usually means just show it.
+            // We will let the rendering loop handle it.
+        }
+
+        if (entries.length === 0) {
+             const msg = isCloudEnabled 
                 ? '云端还没有记录，快去写下第一篇日记吧~' 
                 : '还没有记录，快去写下第一篇日记吧~ (当前为本地模式)';
             timelineContainer.innerHTML = `<p style="text-align:center; color:#888; margin-top:50px;">${msg}</p>`;
