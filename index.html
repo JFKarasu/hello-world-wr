@@ -3,170 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 新年快乐</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>过去今天和明天</title>
+    <link rel="stylesheet" href="css/diary.css">
+    <!-- Google Fonts for Atmosphere -->
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Start Button / Overlay -->
-    <div id="start-screen">
-        <div id="countdown-container">
-            <div class="countdown-title">距离开启还有</div>
-            <div id="countdown-timer">00天 00时 00分 00秒</div>
+
+    <!-- Header Banner -->
+    <header>
+        <div class="banner-content">
+            <p class="banner-text">永不期待 永不假设 永不强求</p>
+            <p class="banner-text">爱自己 爱生活 爱这个世界</p>
+            <div class="banner-buttons">
+                <a href="fireworks.html" class="btn btn-past">过去你好</a>
+                <button id="btn-secret" class="btn btn-secret">想对你说</button>
+                <button id="btn-today" class="btn btn-today">写给今天</button>
+            </div>
         </div>
-        <button id="start-btn" class="hidden">点击开启 2026 之旅</button>
+    </header>
+
+    <!-- Navigation Removed (Moved to Header) -->
+
+    <!-- Timeline Container -->
+    <div class="container">
+        <div class="timeline" id="timeline-container">
+            <!-- Entries will be injected here by JS -->
+        </div>
     </div>
 
-    <!-- Background Canvas -->
-    <canvas id="canvas"></canvas>
-
-    <!-- Poem Container (HTML Overlay) -->
-    <div id="poem-container" class="hidden">
-        <div class="poem-line">你像礼物一样出现在了我的2025年末尾，</div>
-        <div class="poem-line">遇见你，是我一生中最美的意外，</div>
-        <div class="poem-line">遇见从来没有早晚，也没有对错，</div>
-        <div class="poem-line">缘分没有长短，只有深浅，</div>
-        <div class="poem-line">我一点都不遗憾，没有在最好的年纪遇见你，</div>
-        <div class="poem-line">因为在遇见你之后，最好的时光才刚刚开始，</div>
-        <div class="poem-line">我并不知道我们能走多远，</div>
-        <div class="poem-line">但只要你不松手，我就不会先走，</div>
-        <div class="poem-line">从此入目无他人，四下皆是你，</div>
-        <div class="poem-line">我见众生皆草木，唯独见你是青山，</div>
-        <div class="poem-line">此生虽短，幸而有你，人间便不算太冷。</div>
-    </div>
-
-    <!-- Todo Container (HTML Overlay) -->
-    <div id="todo-container" class="hidden">
-        <div id="todo-center-text"></div>
-        <button id="skip-btn" class="hidden">跳过</button>
-    </div>
-
-    <!-- Disclaimer Modal -->
-    <div id="disclaimer-modal" class="hidden">
-        <div class="disclaimer-content">
-            <h1>免责声明</h1>
-            <div class="disclaimer-body">
-                <p><strong>生效日期：</strong> 自双方第一次心动之日起生效</p>
-                <p><strong>有效期限：</strong> 长期有效，原则上自动续期至不可描述的未来</p>
-                <p><strong>适用对象：</strong> 本网站唯一合法指定阅读人是王蓉女士（以下简称“你”）</p>
-                
-                <h3>第一条【访问资格】</h3>
-                <p>1. 本网站访问权为唯一授权、不可转让、不可替代、不可退订之终身制权限。</p>
-                <p>2. 未经授权的第三方访问者，将只会看到普通网页，而无法触发隐藏的恋爱增益效果。</p>
-                
-                <h3>第二条【情感真实性声明】</h3>
-                <p>1. 本网站所包含之表白、思念、祝福及夸奖内容，均为制作人主观真实情感表达。</p>
-                <p>2. 不存在以下情况：</p>
-                <ul>
-                    <li>批量群发表白</li>
-                    <li>模板式敷衍喜欢</li>
-                    <li>临时起意型浪漫</li>
-                </ul>
-                
-                <h3>第三条【长期合作条款】</h3>
-                <p>1. 双方默认建立长期战略甜蜜合作关系。</p>
-                <p>2. 合作范围包括但不限于：</p>
-                <ul>
-                    <li>牵手</li>
-                    <li>拥抱</li>
-                    <li>情绪安抚</li>
-                    <li>偶尔拌嘴但很快和好</li>
-                    <li>一起变老</li>
-                </ul>
-                
-                <h3>第四条【风险提示】</h3>
-                <p>阅读本网站内容可能导致但不限于以下情况：</p>
-                <ol>
-                    <li>幸福感上升</li>
-                    <li>被偏爱感增强</li>
-                    <li>想和制作人一直在一起</li>
-                    <li>对制作人产生严重依赖（不可逆）</li>
-                </ol>
-                
-                <h3>第五条【不可抗力条款】</h3>
-                <p>以下情况不视为违约：</p>
-                <ol>
-                    <li>忍不住想你</li>
-                    <li>半夜突然想发消息给你</li>
-                    <li>看到好吃的就想带给你</li>
-                    <li>每天都想见到你</li>
-                </ol>
-                
-                <h3>第六条【合法合规及个人信息保护声明】</h3>
-                <p>1. 本网站严格遵守合法、正当、必要原则。</p>
-                <p>2. 本网站不会以任何形式实施以下行为：</p>
-                <ul>
-                    <li>非法收集个人信息</li>
-                    <li>偷偷读取聊天记录</li>
-                    <li>窃取隐私数据</li>
-                    <li>追踪除“我想你”的心理轨迹以外的任何数据</li>
-                </ul>
-                <p>3. 本网站仅可能“收集”的信息包括但不限于：</p>
-                <ul>
-                    <li>你今天开不开心</li>
-                    <li>你有没有好好吃饭</li>
-                    <li>你有没有想我</li>
-                </ul>
-                <p>4. 上述信息仅用于提升恋爱服务质量，不作任何第三方共享。</p>
-                
-                <h3>第七条【最终解释权】</h3>
-                <p>1. 本声明最终解释权归网站制作人所有。</p>
-                <p>2. 但制作人的一切决定，优先听取你的意见。</p>
-                
-                <h3>第八条【附加特别条款】</h3>
-                <p>1. 爱你为默认状态，无需手动开启。</p>
-                <p>2. 本条款支持无限期自动续约。</p>
-                <p>3. 若发生争议，以拥抱和亲亲为最终仲裁方式。</p>
-                
-                <div class="tips">
-                    <p>Tips：（请打开声音，横屏体验效果最佳）</p>
-                    <p>1、时间有限，若体验不佳，请多包涵！大年初一，请嘴下留情！</p>
-                    <p>2、制作人源代码地址：https://github.com/JFKarasu/hello-world-wr（假如你想跟制作人一起维护，可自行下载更新代码）</p>
-                    <p>3、来不及再做互动提示了，试试拖动愿望清单里的文字吧，愿望可以合体哦（也就写了99个愿望，辛苦你一个个拖进愿望球里了），烟花页面的爱心也是可以点的，鼠标悬浮上去就可以暂停。（手机端需要点击才能暂停该弹幕，一共有15个彩蛋视频可供食用）</p>
-                    <p>4、希望未来这些愿望和祝福不再是冷冰冰的文字和虚拟出来的视频，而是只属于我们的真实回忆和画面。</p>
-                </div>
+    <!-- Add New Entry Page (Overlay) -->
+    <div id="add-page">
+        <div class="form-container">
+            <div class="form-header">
+                <button id="btn-back" class="btn-back" type="button">← 返回</button>
+                <h2>记录此刻</h2>
             </div>
             
-            <div class="disclaimer-footer">
-                <div class="arrow-container">
-                    <div class="click-hint">貌似只能点我</div>
-                    <div class="arrow">↓</div>
+            <form id="add-entry-form">
+                <div class="form-group">
+                    <label for="entry-date">日期</label>
+                    <input type="date" id="entry-date" required>
                 </div>
-                <button id="agree-btn">同意</button>
+
+                <div class="form-group">
+                    <label for="entry-content">写点什么...</label>
+                    <textarea id="entry-content" placeholder="记录下你的心情..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>添加图片</label>
+                    <div class="file-upload" id="upload-area">
+                        <span>点击或拖拽图片到这里</span>
+                        <input type="file" id="entry-image" accept="image/*" style="display: none;">
+                    </div>
+                    <img id="image-preview" src="" alt="预览">
+                </div>
+
+                <button type="submit" class="btn-submit">保存记录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Secret Letter Modal -->
+    <div id="secret-modal" class="modal-overlay hidden">
+        <button id="close-secret" class="close-btn">×</button>
+        <div class="book-wrapper">
+            <div class="book-page">
+                <div class="letter-content">
+                    <p>这里应该不会再有人来了吧，那就把这段话封存在这里吧！</p>
+                    <br>
+                    <p>原来真的有人出现</p>
+                    <p>只是为了陪你一段短暂又美好的时光</p>
+                    <p>都说智者不坠入爱河</p>
+                    <p>但在你面前我做不了智者</p>
+                    <p>道理我都懂</p>
+                    <p>但还是会在深夜里为难我自己</p>
+                    <p>一切都来的太快了</p>
+                    <p>快到我好像丢失了什么</p>
+                    <p>又好像从未拥有过什么</p>
+                    <p>好多话想说</p>
+                    <p>好多话没说</p>
+                    <p>好多话不能说</p>
+                    <p>你是一位特别值得被爱的女孩子</p>
+                    <p>可爱聪明又善良</p>
+                    <p>像天使一样美丽</p>
+                    <p>想要用心呵护你</p>
+                    <p>想要紧紧拥抱你</p>
+                    <p>想要独自拥有你</p>
+                    <p>但我所有的犹豫、纠缠、痛苦</p>
+                    <p>都是因为既然爱你</p>
+                    <p>就不能让你成为曾经自己最讨厌的那种人</p>
+                    <p>也许等我可以毫无顾忌的说爱你的那天</p>
+                    <p>会突然出现在你面前</p>
+                    <p>就算永远等不到那天</p>
+                    <p>遇见你已是上上签</p>
+                    <p>缘起，我在人群中看见你</p>
+                    <p>缘落，我看你在人群中</p>
+                    <br>
+                    <p>都说离别才是真爱的开始</p>
+                    <p>事实证明当真正深爱过一个人后</p>
+                    <p>已经没有力气再去爱别人了</p>
+                    <p>之前空寂了许久的心</p>
+                    <p>遇到满眼都是我的人而慌了神</p>
+                    <p>只想要紧紧的抓住你</p>
+                    <p>害怕失去你</p>
+                    <p>但就像风筝一样</p>
+                    <p>抓的越紧越容易断</p>
+                    <p>这次没有挽留</p>
+                    <p>尊重你的选择</p>
+                    <p>也放过了我自己</p>
+                    <p>不是因为结局配不上过程而不甘心</p>
+                    <p>没有满心不甘</p>
+                    <p>没有歇斯底里</p>
+                    <p>没有孤独寂寞</p>
+                    <p>允许别人会权衡利弊</p>
+                    <p>允许所有的分道扬镳和事与愿违</p>
+                    <p>允许一切发生</p>
+                    <p>我本来就很好</p>
+                    <p>不然你不会对我有感觉</p>
+                    <p>这里以后只属于我</p>
+                    <p>我要在这里记录所有美好</p>
+                    <p>只关于我</p>
+                    <p>不美好也可以</p>
+                    <p>就像会因为思念的煎熬想要忘记你</p>
+                    <p>谈何容易</p>
+                    <p>坦然接受忘不掉也是我的一部分</p>
+                    <p>因为你早已刻在记忆里</p>
+                    <p>在心底里深埋</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Question Modal -->
-    <div id="question-modal" class="hidden">
-        <div class="modal-content">
-            <h2>心灵问答</h2>
-            <p>制作人的宝贝叫什么名字？</p>
-            <input type="text" id="answer-input" placeholder="请输入答案">
-            <button id="submit-answer-btn">确认</button>
-            <div id="error-msg"></div>
-        </div>
-    </div>
-
-    <!-- Video Overlay -->
-    <div id="video-overlay" class="hidden">
-        <video id="popup-video" controls>
-            您的浏览器不支持视频播放。
-        </video>
-        <button id="close-video-btn">×</button>
-    </div>
-
-    <!-- Audio Element -->
-    <!-- Using NetEase Cloud Music external link for '寂寞烟火' (Lonely Fireworks) -->
-    <!-- Note: If this link expires or fails, please replace with a valid MP3 URL -->
-    <audio id="bgm" loop>
-        <source src="assets/music/唯一.mp3" type="audio/mp3">
-        您的浏览器不支持音频播放。
-    </audio>
-    <audio id="fireworks-bgm" loop>
-        <source src="assets/music/烟花.mp3" type="audio/mp3">
-    </audio>
-
-    <script type="module" src="js/script.js"></script>
+    <!-- Supabase SDK (Modern Alternative to LeanCloud) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/diary.js"></script>
 </body>
 </html>
