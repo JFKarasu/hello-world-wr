@@ -342,4 +342,196 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Click Effect Logic
+    const clickPhrases = ["勇敢", "快乐", "自信", "搞钱", "乐观", "积极", "进取", "正直", "宽容", "阳光", "坚强", "友善", "爱你"];
+    let clickIndex = 0;
+
+    document.addEventListener('click', (e) => {
+        // Create span element
+        const span = document.createElement('span');
+        span.textContent = clickPhrases[clickIndex];
+        span.className = 'click-text';
+        
+        // Random Color
+        const randomColor = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
+        span.style.color = randomColor;
+
+        // Position
+        span.style.left = `${e.pageX}px`;
+        span.style.top = `${e.pageY}px`;
+
+        // Append to body
+        document.body.appendChild(span);
+
+        // Remove after animation (1s)
+        setTimeout(() => {
+            span.remove();
+        }, 1000);
+
+        // Update index
+        clickIndex = (clickIndex + 1) % clickPhrases.length;
+    });
+
+    // Visitor Tracking & Secret Logs Logic
+    const secretTrigger = document.getElementById('secret-trigger');
+    const visitorModal = document.getElementById('visitor-modal');
+    const closeVisitor = document.getElementById('close-visitor');
+    const visitorTableBody = document.querySelector('#visitor-table tbody');
+    
+    // Pagination Elements
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfoSpan = document.getElementById('page-info');
+    
+    let currentPage = 1;
+    const pageSize = 10;
+
+    // 1. Track Visitor on Load
+    async function trackVisitor() {
+        if (!isCloudEnabled || !dbClient) return;
+        
+        // Exclude Localhost
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            console.log('Local environment detected. Visitor tracking skipped.');
+            return;
+        }
+
+        try {
+            // Fetch IP Info
+            // Using ipapi.co (Free Tier) - provides detailed location
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('IP API Failed');
+            const data = await response.json();
+            
+            const logEntry = {
+                ip_address: data.ip,
+                country: data.country_name,
+                region: data.region,
+                city: data.city,
+                isp: data.org,
+                visit_time: new Date().toISOString()
+            };
+
+            // Insert into Supabase
+            const { error } = await dbClient
+                .from('visitor_logs')
+                .insert([logEntry]);
+
+            if (error) {
+                console.error('Visitor Log Error:', error);
+                if (error.code === '42P01') {
+                    console.warn("Table 'visitor_logs' does not exist. Please create it in Supabase.");
+                }
+            } else {
+                console.log('Visitor tracked successfully.');
+            }
+        } catch (e) {
+            console.error('Tracking failed:', e);
+        }
+    }
+    
+    // Execute tracking
+    trackVisitor();
+
+    // Helper: Load Logs for Page
+    async function loadVisitorLogs(page) {
+        if (!isCloudEnabled || !dbClient) return;
+        
+        visitorTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">加载中...</td></tr>';
+        
+        try {
+            const from = (page - 1) * pageSize;
+            const to = from + pageSize - 1;
+
+            const { data, error, count } = await dbClient
+                .from('visitor_logs')
+                .select('*', { count: 'exact' })
+                .order('visit_time', { ascending: false })
+                .range(from, to);
+            
+            if (error) throw error;
+            
+            visitorTableBody.innerHTML = '';
+            if (data.length === 0) {
+                visitorTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">暂无访客记录</td></tr>';
+                return;
+            }
+
+            data.forEach(log => {
+                const row = document.createElement('tr');
+                const time = new Date(log.visit_time).toLocaleString();
+                
+                // Format Location: Country - Region - City
+                const locationParts = [log.country, log.region, log.city].filter(Boolean);
+                const locationStr = locationParts.join(' - ') || '未知位置';
+
+                row.innerHTML = `
+                    <td>${time}</td>
+                    <td>${log.ip_address || '-'}</td>
+                    <td>${locationStr}</td>
+                    <td>${log.isp || '-'}</td>
+                `;
+                visitorTableBody.appendChild(row);
+            });
+
+            // Update Pagination UI
+            pageInfoSpan.textContent = `第 ${page} 页`;
+            prevPageBtn.disabled = page === 1;
+            
+            // Check if there are more pages
+            const totalPages = Math.ceil(count / pageSize);
+            nextPageBtn.disabled = page >= totalPages;
+
+        } catch (error) {
+            console.error("Fetch Logs Error:", error);
+            let msg = error.message;
+            if (error.code === '42P01') msg = "表 visitor_logs 不存在，请去 Supabase 创建";
+            visitorTableBody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">加载失败: ${msg}</td></tr>`;
+        }
+    }
+
+    // 2. Secret Trigger Logic
+    if (secretTrigger && visitorModal) {
+        secretTrigger.addEventListener('click', () => {
+            visitorModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            if (isCloudEnabled && dbClient) {
+                currentPage = 1; // Reset to first page
+                loadVisitorLogs(currentPage);
+            } else {
+                visitorTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">请先配置 Supabase 连接</td></tr>';
+            }
+        });
+
+        // Pagination Events
+        if (prevPageBtn) {
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadVisitorLogs(currentPage);
+                }
+            });
+        }
+
+        if (nextPageBtn) {
+            nextPageBtn.addEventListener('click', () => {
+                currentPage++;
+                loadVisitorLogs(currentPage);
+            });
+        }
+
+        // Close Logic
+        const closeVisitorModalFn = () => {
+            visitorModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        if (closeVisitor) closeVisitor.addEventListener('click', closeVisitorModalFn);
+        visitorModal.addEventListener('click', (e) => {
+            if (e.target === visitorModal) closeVisitorModalFn();
+        });
+    }
 });

@@ -12,6 +12,7 @@
 
     <!-- Header Banner -->
     <header>
+        <div id="secret-trigger" title=""></div>
         <div class="banner-content">
             <p class="banner-text">永不期待 永不假设 永不强求</p>
             <p class="banner-text">爱自己 爱生活 爱这个世界</p>
@@ -132,6 +133,37 @@
                     <p>因为你早已刻在记忆里</p>
                     <p>在心底里深埋</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visitor Logs Modal -->
+    <div id="visitor-modal" class="modal-overlay hidden">
+        <div class="visitor-container">
+            <div class="visitor-header">
+                <h3>访客记录</h3>
+                <button id="close-visitor" class="close-btn-simple">×</button>
+            </div>
+            <div class="visitor-content">
+                <table id="visitor-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>IP地址</th>
+                            <th>位置</th>
+                            <th>运营商</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Logs will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination Controls -->
+            <div class="visitor-footer" style="padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                <button id="prev-page" class="btn" style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">上一页</button>
+                <span id="page-info" style="font-size: 0.9rem; color: #666;">第 1 页</span>
+                <button id="next-page" class="btn" style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">下一页</button>
             </div>
         </div>
     </div>
