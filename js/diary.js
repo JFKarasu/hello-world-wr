@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const timelineContainer = document.getElementById('timeline-container');
     const addPage = document.getElementById('add-page');
-    const btnToday = document.getElementById('btn-today'); 
-    const btnBack = document.getElementById('btn-back');   
+    const btnToday = document.getElementById('btn-today');
+    const btnBack = document.getElementById('btn-back');
     const form = document.getElementById('add-entry-form');
     const dateInput = document.getElementById('entry-date');
     const contentInput = document.getElementById('entry-content');
@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         .from('diary_entries')
                         .select('*')
                         .order('date', { ascending: false });
-                    
+
                     if (error) throw error;
-                    
+
                     return data.map(item => ({
                         id: item.id,
                         date: item.date,
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const { data: urlData } = dbClient.storage
                             .from('diary_images')
                             .getPublicUrl(filePath);
-                        
+
                         imageUrl = urlData.publicUrl;
                     }
 
@@ -116,10 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const { data, error } = await dbClient
                         .from('diary_entries')
                         .insert([
-                            { 
-                                date: entry.date, 
-                                content: entry.content, 
-                                image_url: imageUrl 
+                            {
+                                date: entry.date,
+                                content: entry.content,
+                                image_url: imageUrl
                             }
                         ])
                         .select();
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         throw error;
                     }
-                    
+
                     return data[0];
                 } catch (error) {
                     console.error("Supabase Save Error:", error);
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     content: entry.content,
                     image: entry.imagePreviewSrc || null
                 };
-                
+
                 const currentEntries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
                 currentEntries.unshift(newEntry);
                 localStorage.setItem('diaryEntries', JSON.stringify(currentEntries));
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = date.getDate().toString().padStart(2, '0');
         return `${year}年${month}月${day}日`;
     }
-    
+
     // Helper: Sort Entries
     function sortEntries() {
         entries.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function refreshTimeline() {
         timelineContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:50px;">加载中...</p>';
         entries = await DataService.loadEntries();
-        
+
         timelineContainer.innerHTML = '';
         sortEntries();
 
@@ -184,15 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: '翻身了，再也不是8块钱的参与奖了，元宵快乐！',
                 image: 'assets/images/yuanxiao.jpg' // Assuming this path is valid relative to index.html
             }];
-            
+
             // Only show message if we decide not to show default data, but user asked for default data.
             // If we want to persist it, we should save it, but "display a default test data" usually means just show it.
             // We will let the rendering loop handle it.
         }
 
         if (entries.length === 0) {
-             const msg = isCloudEnabled 
-                ? '云端还没有记录，快去写下第一篇日记吧~' 
+            const msg = isCloudEnabled
+                ? '云端还没有记录，快去写下第一篇日记吧~'
                 : '还没有记录，快去写下第一篇日记吧~ (当前为本地模式)';
             timelineContainer.innerHTML = `<p style="text-align:center; color:#888; margin-top:50px;">${msg}</p>`;
             return;
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const entryDiv = document.createElement('div');
             const positionClass = index % 2 === 0 ? 'left' : 'right';
             entryDiv.className = `entry ${positionClass}`;
-            
+
             let imageHtml = '';
             if (entry.image) {
                 imageHtml = `
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${imageHtml}
                 </div>
             `;
-            
+
             timelineContainer.appendChild(entryDiv);
         });
     }
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalText = submitBtn.innerText;
         submitBtn.innerText = '保存中...';
         submitBtn.disabled = true;
-        
+
         try {
             const entryData = {
                 date: dateVal,
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         closeSecret.addEventListener('click', closeModal);
-        
+
         // Close when clicking outside the book
         secretModal.addEventListener('click', (e) => {
             if (e.target === secretModal) {
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const span = document.createElement('span');
         span.textContent = clickPhrases[clickIndex];
         span.className = 'click-text';
-        
+
         // Random Color
         const randomColor = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
         span.style.color = randomColor;
@@ -378,39 +378,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const visitorModal = document.getElementById('visitor-modal');
     const closeVisitor = document.getElementById('close-visitor');
     const visitorTableBody = document.querySelector('#visitor-table tbody');
-    
+
     // Pagination Elements
     const prevPageBtn = document.getElementById('prev-page');
     const nextPageBtn = document.getElementById('next-page');
     const pageInfoSpan = document.getElementById('page-info');
-    
+
     let currentPage = 1;
     const pageSize = 10;
 
     // 1. Track Visitor on Load
     async function trackVisitor() {
         if (!isCloudEnabled || !dbClient) return;
-        
-        // Exclude Localhost
+
         const hostname = window.location.hostname;
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            console.log('Local environment detected. Visitor tracking skipped.');
-            return;
-        }
+        const isLocal = (hostname === 'localhost' || hostname === '127.0.0.1');
 
         try {
-            // Fetch IP Info
-            // Using ipapi.co (Free Tier) - provides detailed location
-            const response = await fetch('https://ipapi.co/json/');
+            // Using get.geojs.io
+            const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
             if (!response.ok) throw new Error('IP API Failed');
             const data = await response.json();
-            
+
+            // If local, append a tag to the IP
+            const displayIp = isLocal ? `${data.ip} (本地)` : data.ip;
+
             const logEntry = {
-                ip_address: data.ip,
-                country: data.country_name,
+                ip_address: displayIp,
+                country: data.country,
                 region: data.region,
-                city: data.city,
-                isp: data.org,
+                isp: data.organization_name,
                 visit_time: new Date().toISOString()
             };
 
@@ -431,16 +428,16 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Tracking failed:', e);
         }
     }
-    
+
     // Execute tracking
     trackVisitor();
 
     // Helper: Load Logs for Page
     async function loadVisitorLogs(page) {
         if (!isCloudEnabled || !dbClient) return;
-        
+
         visitorTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">加载中...</td></tr>';
-        
+
         try {
             const from = (page - 1) * pageSize;
             const to = from + pageSize - 1;
@@ -450,9 +447,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 .select('*', { count: 'exact' })
                 .order('visit_time', { ascending: false })
                 .range(from, to);
-            
+
             if (error) throw error;
-            
+
             visitorTableBody.innerHTML = '';
             if (data.length === 0) {
                 visitorTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">暂无访客记录</td></tr>';
@@ -462,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.forEach(log => {
                 const row = document.createElement('tr');
                 const time = new Date(log.visit_time).toLocaleString();
-                
+
                 // Format Location: Country - Region - City
                 const locationParts = [log.country, log.region, log.city].filter(Boolean);
                 const locationStr = locationParts.join(' - ') || '未知位置';
@@ -479,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update Pagination UI
             pageInfoSpan.textContent = `第 ${page} 页`;
             prevPageBtn.disabled = page === 1;
-            
+
             // Check if there are more pages
             const totalPages = Math.ceil(count / pageSize);
             nextPageBtn.disabled = page >= totalPages;
@@ -497,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         secretTrigger.addEventListener('click', () => {
             visitorModal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
+
             if (isCloudEnabled && dbClient) {
                 currentPage = 1; // Reset to first page
                 loadVisitorLogs(currentPage);

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>过去今天和明天</title>
     <link rel="stylesheet" href="css/diary.css">
     <!-- Google Fonts for Atmosphere -->
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
 
     <!-- Header Banner -->
@@ -40,7 +43,7 @@
                 <button id="btn-back" class="btn-back" type="button">← 返回</button>
                 <h2>记录此刻</h2>
             </div>
-            
+
             <form id="add-entry-form">
                 <div class="form-group">
                     <label for="entry-date">日期</label>
@@ -160,10 +163,13 @@
                 </table>
             </div>
             <!-- Pagination Controls -->
-            <div class="visitor-footer" style="padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; align-items: center; gap: 15px;">
-                <button id="prev-page" class="btn" style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">上一页</button>
+            <div class="visitor-footer"
+                style="padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                <button id="prev-page" class="btn"
+                    style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">上一页</button>
                 <span id="page-info" style="font-size: 0.9rem; color: #666;">第 1 页</span>
-                <button id="next-page" class="btn" style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">下一页</button>
+                <button id="next-page" class="btn"
+                    style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">下一页</button>
             </div>
         </div>
     </div>
@@ -172,4 +178,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/diary.js"></script>
 </body>
+
 </html>
