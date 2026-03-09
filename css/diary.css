@@ -114,9 +114,9 @@ h1 {
 }
 
 /* Specific overrides if needed, but user asked for unified style */
-.btn-today {
-    /* box-shadow: 0 4px 6px rgba(0,0,0,0.1); */
-}
+/* .btn-today {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+} */
 
 /* Remove old nav-buttons styles since we moved them */
 .nav-buttons {
@@ -125,7 +125,7 @@ h1 {
 
 /* Main Container */
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -133,7 +133,8 @@ h1 {
 /* Timeline Styles */
 .timeline {
     position: relative;
-    padding: 20px 0;
+    padding: 70px 0 20px;
+    /* Space for the absolute Now badge */
 }
 
 /* Central Line */
@@ -152,7 +153,8 @@ h1 {
 
 /* Timeline Entry Item */
 .entry {
-    padding: 10px 40px;
+    padding: 10px 52px;
+    /* 12px gap to avatar margin from box */
     position: relative;
     background-color: inherit;
     width: 50%;
@@ -174,27 +176,91 @@ h1 {
     /* Content aligns left towards the center */
 }
 
-/* The Dots on the Line */
+/* The Dots on the Line (Hidden in favor of marker) */
 .entry::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    right: -6px;
-    /* Right edge for left items */
-    background-color: #fff;
-    border: 3px solid #FF9800;
-    /* Orange/Gold accent */
-    top: 20px;
-    /* Align with top of content roughly */
-    border-radius: 50%;
-    z-index: 1;
+    display: none;
 }
 
-/* Correct Dot Position for Right Entries */
-.entry.right::after {
-    left: -6px;
-    /* Left edge for right items */
+/* Timeline "Now" Top Badge */
+.timeline-now {
+    text-align: center;
+    background-color: #A365B6;
+    /* Purple color matching screenshot */
+    color: white;
+    padding: 8px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    border-radius: 2px;
+}
+
+/* Timeline Marker (Avatar + Date) */
+.timeline-marker {
+    position: absolute;
+    top: 0;
+    width: 48px;
+    /* Slightly smaller */
+    text-align: center;
+    background-color: #f4f6f8;
+    z-index: 2;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.entry.left .timeline-marker {
+    right: -24px;
+    /* Half of 48px */
+}
+
+.entry.right .timeline-marker {
+    left: -24px;
+}
+
+.marker-avatar {
+    width: 48px;
+    /* Scaled down slightly */
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 8px;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.marker-day {
+    font-size: 1.5rem;
+    /* Scaled down slightly */
+    font-weight: bold;
+    color: #6a7f8e;
+    line-height: 1;
+    font-family: Arial, sans-serif;
+}
+
+.marker-month {
+    font-size: 0.85rem;
+    /* Scaled down slightly */
+    font-weight: bold;
+    color: #8da2af;
+    margin-top: 4px;
+    white-space: nowrap;
+    font-family: Arial, sans-serif;
+}
+
+.timeline-total {
+    text-align: center;
+    padding: 30px 0 50px;
+    color: #444;
+    font-size: 1rem;
+    position: relative;
+    z-index: 2;
+    background-color: #f4f6f8;
+    width: 100%;
 }
 
 /* Card Content */
@@ -212,13 +278,48 @@ h1 {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Date inside Card */
-.date {
-    font-size: 0.9rem;
-    color: #888;
+/* Arrow for left entry (box is on the left, arrow points right) */
+.entry.left .content::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: -10px;
+    border-width: 10px 0 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent white;
+    z-index: 1;
+}
+
+/* Arrow for right entry (box is on the right, arrow points left) */
+.entry.right .content::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -10px;
+    border-width: 10px 10px 10px 0;
+    border-style: solid;
+    border-color: transparent white transparent transparent;
+    z-index: 1;
+}
+
+/* Time Header inside Card */
+.time-header {
     margin-bottom: 10px;
+    font-size: 1rem;
     font-weight: bold;
-    display: block;
+    display: flex;
+    align-items: center;
+}
+
+.write-down {
+    color: #8F9EA6;
+    margin-right: 6px;
+    font-family: Arial, sans-serif;
+}
+
+.time-text {
+    color: #4D627B;
+    font-family: Arial, sans-serif;
 }
 
 /* Text Content */
@@ -503,6 +604,33 @@ textarea {
 /* Responsive Design */
 @media screen and (max-width: 600px) {
 
+    header {
+        padding: 30px 0;
+    }
+
+    .banner-content {
+        height: 180px;
+        gap: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .banner-text {
+        font-size: 1.2rem;
+    }
+
+    .btn,
+    .btn-secret {
+        width: 40vw;
+        /* Make buttons dynamic */
+        max-width: 120px;
+        min-width: 90px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+
     /* Move timeline line to left */
     .timeline::after {
         left: 31px;
@@ -511,8 +639,9 @@ textarea {
     /* Make all entries right-aligned relative to the line */
     .entry {
         width: 100%;
-        padding-left: 70px;
-        padding-right: 25px;
+        padding-left: 83px;
+        /* 31 + 30 + 12 (gap) + 10 (arrow) */
+        padding-right: 20px;
     }
 
     .entry.left,
@@ -522,19 +651,27 @@ textarea {
         /* Always left align text on mobile */
     }
 
-    /* Move dots to left */
-    .entry::after {
-        left: 25px;
-        /* On the line */
+    .entry.left .timeline-marker,
+    .entry.right .timeline-marker {
+        left: 7px;
+        /* 31px (timeline line) - 24px (half marker width) */
+        right: auto;
     }
 
-    .entry.right::after {
-        left: 25px;
-        /* Same for right */
+    /* Adjust Now Badge for Mobile */
+    .timeline-now {
+        left: 31px;
+        transform: translateX(-50%);
+        padding: 6px 20px;
+        font-size: 1rem;
     }
 
-    h1 {
-        font-size: 1.5rem;
+    /* Make left entry's arrow point left on mobile too */
+    .entry.left .content::before {
+        right: auto;
+        left: -10px;
+        border-width: 10px 10px 10px 0;
+        border-color: transparent white transparent transparent;
     }
 
     .nav-buttons {

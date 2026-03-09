@@ -75,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         id: item.id,
                         date: item.date,
                         content: item.content,
-                        image: item.image_url
+                        image: item.image_url,
+                        created_at: item.created_at || null
                     }));
                 } catch (error) {
                     console.error("Supabase Load Error:", error);
@@ -198,6 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Add "Now" badge at the top
+        const nowDiv = document.createElement('div');
+        nowDiv.className = 'timeline-now';
+        nowDiv.innerText = 'Now';
+        timelineContainer.appendChild(nowDiv);
+
         entries.forEach((entry, index) => {
             const entryDiv = document.createElement('div');
             const positionClass = index % 2 === 0 ? 'left' : 'right';
@@ -212,9 +219,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            const dateObj = new Date(entry.date);
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const yearMonth = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+
+            let hours = '00';
+            let minutes = '00';
+
+            // Prefer database created timestamp, otherwise fallback to the saved date string or ID
+            const timeSource = entry.created_at || entry.date;
+
+            if (timeSource && typeof timeSource === 'string' && timeSource.includes('T')) {
+                const timeObj = new Date(timeSource);
+                hours = timeObj.getHours().toString().padStart(2, '0');
+                minutes = timeObj.getMinutes().toString().padStart(2, '0');
+            } else if (entry.id && typeof entry.id === 'number') {
+                const idDate = new Date(entry.id);
+                hours = idDate.getHours().toString().padStart(2, '0');
+                minutes = idDate.getMinutes().toString().padStart(2, '0');
+            } else {
+                hours = dateObj.getHours().toString().padStart(2, '0');
+                minutes = dateObj.getMinutes().toString().padStart(2, '0');
+            }
+
             entryDiv.innerHTML = `
+                <div class="timeline-marker">
+                    <img src="assets/images/header-boy.png" alt="Avatar" class="marker-avatar">
+                    <div class="marker-day">${day}</div>
+                    <div class="marker-month">${yearMonth}</div>
+                </div>
                 <div class="content">
-                    <span class="date">${formatDate(entry.date)}</span>
+                    <div class="time-header">
+                        <span class="write-down">Write down</span>
+                        <span class="time-text">${hours}:${minutes}</span>
+                    </div>
                     <div class="text">${entry.content}</div>
                     ${imageHtml}
                 </div>
@@ -222,6 +260,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             timelineContainer.appendChild(entryDiv);
         });
+
+        const totalDiv = document.createElement('div');
+        totalDiv.className = 'timeline-total';
+        totalDiv.innerHTML = `共 ${entries.length} 个瞬间`;
+        timelineContainer.appendChild(totalDiv);
     }
 
     refreshTimeline();
@@ -291,6 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateVal = dateInput.value;
         if (!contentVal || !dateVal) return alert('请填写日期和内容');
 
+        const now = new Date();
+        const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        const dateTimeVal = `${dateVal}T${timeString}`;
+
         const submitBtn = form.querySelector('.btn-submit');
         const originalText = submitBtn.innerText;
         submitBtn.innerText = '保存中...';
@@ -298,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const entryData = {
-                date: dateVal,
+                date: dateTimeVal,
                 content: contentVal,
                 imageFile: imageInput.files[0],
                 imagePreviewSrc: imagePreview.src && imagePreview.style.display !== 'none' ? imagePreview.src : null
