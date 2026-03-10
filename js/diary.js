@@ -203,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const nowDiv = document.createElement('div');
         nowDiv.className = 'timeline-now';
         nowDiv.innerText = 'Now';
+        nowDiv.style.cursor = 'pointer';
+        nowDiv.addEventListener('click', show3DHeartEffect);
         timelineContainer.appendChild(nowDiv);
 
         entries.forEach((entry, index) => {
@@ -577,5 +579,187 @@ document.addEventListener('DOMContentLoaded', () => {
         visitorModal.addEventListener('click', (e) => {
             if (e.target === visitorModal) closeVisitorModalFn();
         });
+    }
+
+    // 3D Particle Heart Effect Logic
+    function show3DHeartEffect() {
+        if (document.getElementById('heart-3d-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'heart-3d-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        overlay.style.zIndex = '99999';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.cursor = 'pointer';
+
+        // Add a close hint
+        const hint = document.createElement('div');
+        hint.innerText = '点击任意处关闭';
+        hint.style.position = 'absolute';
+        hint.style.bottom = '30px';
+        hint.style.color = 'rgba(255, 255, 255, 0.5)';
+        hint.style.fontSize = '14px';
+        hint.style.letterSpacing = '2px';
+        overlay.appendChild(hint);
+
+        const canvas = document.createElement('canvas');
+        overlay.appendChild(canvas);
+        document.body.appendChild(overlay);
+
+        const ctx = canvas.getContext('2d');
+        let width = overlay.clientWidth;
+        let height = overlay.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('heart-3d-overlay')) return;
+            width = overlay.clientWidth;
+            height = overlay.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+        });
+
+        overlay.addEventListener('click', () => {
+            overlay.remove();
+        });
+
+        const particles = [];
+        const particleCount = 5000;
+
+        for (let i = 0; i < particleCount; i++) {
+            let px, py, pz;
+            while (true) {
+                // 3D心形包围盒粗略在 x:[-1.5, 1.5], y:[-1.5, 1.5], z:[-1.5, 1.5]
+                px = (Math.random() - 0.5) * 3;
+                py = (Math.random() - 0.5) * 3;
+                pz = (Math.random() - 0.5) * 3;
+
+                // 3D 心形不等式公式: (x^2 + 9/4*y^2 + z^2 - 1)^3 - x^2*z^3 - 9/80*y^2*z^3 <= 0
+                const a = px * px + 2.25 * py * py + pz * pz - 1;
+                const val = a * a * a - px * px * pz * pz * pz - 0.1125 * py * py * pz * pz * pz;
+
+                if (val <= 0) {
+                    // 让表面粒子更多，内部粒子略少，显得更有立体光感
+                    if (val > -0.2 || Math.random() > 0.6) {
+                        break;
+                    }
+                }
+            }
+
+            const sizeScale = 16.0;
+            // 数学上的z是向上的，而在屏幕上y是向下的。所以screenY = -z, screenZ = y。
+            const targetX = px * sizeScale;
+            const targetY = -pz * sizeScale - 5; // 稍微整体上移一点点
+            const targetZ = py * sizeScale;
+
+            // 地板散落的初始位置 (形成一个大圆盘区)
+            const groundRadius = 20 + Math.random() * 80;
+            const groundAngle = Math.random() * Math.PI * 2;
+            const startX = Math.cos(groundAngle) * groundRadius;
+            const startZ = Math.sin(groundAngle) * groundRadius;
+            const startY = 50 + Math.random() * 5; // 固定在底部
+
+            particles.push({
+                x: startX,
+                y: startY,
+                z: startZ,
+                targetX: targetX,
+                targetY: targetY,
+                targetZ: targetZ,
+                startX: startX,
+                startY: startY,
+                startZ: startZ,
+                color: 'hsla(' + (340 + Math.random() * 20) + ', 100%, ' + (50 + Math.random() * 30) + '%, ' + (0.5 + Math.random() * 0.4) + ')',
+                size: Math.random() * 1.5 + 0.5,
+                // 起飞延迟，底部的粒子可能起飞晚一些，或者随机
+                delay: Math.random() * 2500,
+                flyDuration: 1500 + Math.random() * 1500
+            });
+        }
+
+        let angleY = 0;
+        let angleX = 0;
+        const startTime = Date.now();
+
+        function animate() {
+            if (!document.getElementById('heart-3d-overlay')) return;
+            requestAnimationFrame(animate);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            angleY += 0.015;
+            angleX = Math.sin(angleY * 0.5) * 0.2;
+
+            const cosY = Math.cos(angleY);
+            const sinY = Math.sin(angleY);
+            const cosX = Math.cos(angleX);
+            const sinX = Math.sin(angleX);
+
+            const scale = Math.min(width, height) / 80;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            const beat = 1 + Math.sin(Date.now() * 0.005) * 0.08;
+            const timePassed = Date.now() - startTime;
+
+            ctx.globalCompositeOperation = 'lighter';
+
+            particles.forEach(p => {
+                // 计算当前动画进度
+                let progress = Math.max(0, Math.min(1, (timePassed - p.delay) / p.flyDuration));
+
+                // 缓动曲线 (EaseOutExpo)
+                let easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+                // 动态基础位置
+                let currBaseX = p.startX + (p.targetX - p.startX) * easeProgress;
+                let currBaseY = p.startY + (p.targetY - p.startY) * easeProgress;
+                let currBaseZ = p.startZ + (p.targetZ - p.startZ) * easeProgress;
+
+                // 到达顶部后加入呼吸和浮动的效果
+                let floatAmt = progress === 1 ? 0.5 : 0;
+                p.x = currBaseX + (floatAmt > 0 ? Math.sin(Date.now() * 0.002 + p.targetY) * floatAmt : 0);
+                p.y = currBaseY + (floatAmt > 0 ? Math.cos(Date.now() * 0.002 + p.targetX) * floatAmt : 0);
+                p.z = currBaseZ;
+
+                let rx = p.x * cosY - p.z * sinY;
+                let rz = p.z * cosY + p.x * sinY;
+
+                let ry = p.y * cosX - rz * sinX;
+                rz = rz * cosX + p.y * sinX;
+
+                // 只有形成心形后才有明显跳动
+                let currentBeat = 1 + (beat - 1) * easeProgress;
+                rx *= currentBeat;
+                ry *= currentBeat;
+                rz *= currentBeat;
+
+                const perspective = 500 / (500 + rz * scale);
+                const pxScreen = centerX + rx * scale * perspective;
+                const pyScreen = centerY + ry * scale * perspective;
+
+                const rSize = p.size * perspective * currentBeat;
+
+                if (rSize > 0) {
+                    ctx.beginPath();
+                    ctx.arc(pxScreen, pyScreen, rSize, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                }
+            });
+
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        animate();
     }
 });

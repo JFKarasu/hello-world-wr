@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>过去今天和明天</title>
+    <!-- Google Fonts for Atmosphere -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" crossorigin href="/assets/index-COXfNVVw.css">
+</head>
+
+<body>
+
+    <!-- Header Banner -->
+    <header>
+        <div id="secret-trigger" title=""></div>
+        <div class="banner-content">
+            <p class="banner-text">永不期待 永不假设 永不强求</p>
+            <p class="banner-text">爱自己 爱生活 爱这个世界</p>
+            <div class="banner-buttons">
+                <a href="fireworks.html" class="btn btn-past">过去你好</a>
+                <button id="btn-secret" class="btn btn-secret">想对你说</button>
+                <button id="btn-today" class="btn btn-today">写给今天</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Removed (Moved to Header) -->
+
+    <!-- Timeline Container -->
+    <div class="container">
+        <div class="timeline" id="timeline-container">
+            <!-- Entries will be injected here by JS -->
+        </div>
+    </div>
+
+    <!-- Add New Entry Page (Overlay) -->
+    <div id="add-page">
+        <div class="form-container">
+            <div class="form-header">
+                <button id="btn-back" class="btn-back" type="button">← 返回</button>
+                <h2>记录此刻</h2>
+            </div>
+
+            <form id="add-entry-form">
+                <div class="form-group">
+                    <label for="entry-date">日期</label>
+                    <input type="date" id="entry-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="entry-content">写点什么...</label>
+                    <textarea id="entry-content" placeholder="记录下你的心情..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>添加图片</label>
+                    <div class="file-upload" id="upload-area">
+                        <span>点击或拖拽图片到这里</span>
+                        <input type="file" id="entry-image" accept="image/*" style="display: none;">
+                    </div>
+                    <img id="image-preview" src="" alt="预览">
+                </div>
+
+                <button type="submit" class="btn-submit">保存记录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Secret Letter Modal -->
+    <div id="secret-modal" class="modal-overlay hidden">
+        <button id="close-secret" class="close-btn">×</button>
+        <div class="book-wrapper">
+            <div class="book-page">
+                <div class="letter-content">
+                    <p>这里应该不会再有人来了吧，那就把这段话封存在这里吧！</p>
+                    <br>
+                    <p>原来真的有人出现</p>
+                    <p>只是为了陪你一段短暂又美好的时光</p>
+                    <p>都说智者不坠入爱河</p>
+                    <p>但在你面前我做不了智者</p>
+                    <p>道理我都懂</p>
+                    <p>但还是会在深夜里为难我自己</p>
+                    <p>一切都来的太快了</p>
+                    <p>快到我好像丢失了什么</p>
+                    <p>又好像从未拥有过什么</p>
+                    <p>好多话想说</p>
+                    <p>好多话没说</p>
+                    <p>好多话不能说</p>
+                    <p>你是一位特别值得被爱的女孩子</p>
+                    <p>可爱聪明又善良</p>
+                    <p>像天使一样美丽</p>
+                    <p>想要用心呵护你</p>
+                    <p>想要紧紧拥抱你</p>
+                    <p>想要独自拥有你</p>
+                    <p>但我所有的犹豫、纠缠、痛苦</p>
+                    <p>都是因为既然爱你</p>
+                    <p>就不能让你成为曾经自己最讨厌的那种人</p>
+                    <p>也许等我可以毫无顾忌的说爱你的那天</p>
+                    <p>会突然出现在你面前</p>
+                    <p>就算永远等不到那天</p>
+                    <p>遇见你已是上上签</p>
+                    <p>缘起，我在人群中看见你</p>
+                    <p>缘落，我看你在人群中</p>
+                    <br>
+                    <p>都说离别才是真爱的开始</p>
+                    <p>事实证明当真正深爱过一个人后</p>
+                    <p>已经没有力气再去爱别人了</p>
+                    <p>之前空寂了许久的心</p>
+                    <p>遇到满眼都是我的人而慌了神</p>
+                    <p>只想要紧紧的抓住你</p>
+                    <p>害怕失去你</p>
+                    <p>但就像风筝一样</p>
+                    <p>抓的越紧越容易断</p>
+                    <p>这次没有挽留</p>
+                    <p>尊重你的选择</p>
+                    <p>也放过了我自己</p>
+                    <p>不是因为结局配不上过程而不甘心</p>
+                    <p>没有满心不甘</p>
+                    <p>没有歇斯底里</p>
+                    <p>没有孤独寂寞</p>
+                    <p>允许别人会权衡利弊</p>
+                    <p>允许所有的分道扬镳和事与愿违</p>
+                    <p>允许一切发生</p>
+                    <p>我本来就很好</p>
+                    <p>不然你不会对我有感觉</p>
+                    <p>这里以后只属于我</p>
+                    <p>我要在这里记录所有美好</p>
+                    <p>只关于我</p>
+                    <p>不美好也可以</p>
+                    <p>就像会因为思念的煎熬想要忘记你</p>
+                    <p>谈何容易</p>
+                    <p>坦然接受忘不掉也是我的一部分</p>
+                    <p>因为你早已刻在记忆里</p>
+                    <p>在心底里深埋</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visitor Logs Modal -->
+    <div id="visitor-modal" class="modal-overlay hidden">
+        <div class="visitor-container">
+            <div class="visitor-header">
+                <h3>访客记录</h3>
+                <button id="close-visitor" class="close-btn-simple">×</button>
+            </div>
+            <div class="visitor-content">
+                <table id="visitor-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>IP地址</th>
+                            <th>位置</th>
+                            <th>运营商</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Logs will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination Controls -->
+            <div class="visitor-footer"
+                style="padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                <button id="prev-page" class="btn"
+                    style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">上一页</button>
+                <span id="page-info" style="font-size: 0.9rem; color: #666;">第 1 页</span>
+                <button id="next-page" class="btn"
+                    style="width: auto; height: 32px; padding: 0 15px; font-size: 0.9rem;">下一页</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK (Modern Alternative to LeanCloud) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/diary.js"></script>
+</body>
+
+</html>
