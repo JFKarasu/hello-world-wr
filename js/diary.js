@@ -277,8 +277,13 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreview.style.display = 'none';
         imagePreview.src = '';
         imageInput.value = '';
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.value = today;
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
         addPage.classList.add('active');
         document.body.style.overflow = 'hidden';
     });
@@ -336,9 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateVal = dateInput.value;
         if (!contentVal || !dateVal) return alert('请填写日期和内容');
 
-        const now = new Date();
-        const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-        const dateTimeVal = `${dateVal}T${timeString}`;
+        const dateTimeVal = dateVal;
 
         const submitBtn = form.querySelector('.btn-submit');
         const originalText = submitBtn.innerText;
