@@ -228,8 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let hours = '00';
             let minutes = '00';
 
-            // Prefer database created timestamp, otherwise fallback to the saved date string or ID
-            const timeSource = entry.created_at || entry.date;
+            // Prefer the saved date string (which includes the user-selected time), otherwise fallback to the database created timestamp or ID
+            const timeSource = entry.date || entry.created_at;
 
             if (timeSource && typeof timeSource === 'string' && timeSource.includes('T')) {
                 const timeObj = new Date(timeSource);
