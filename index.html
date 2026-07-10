@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>过去今天和明天</title>
     <link rel="stylesheet" href="css/diary.css">
+    <link rel="stylesheet" href="css/cake.scss">
     <!-- Google Fonts for Atmosphere -->
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap"
         rel="stylesheet">
@@ -17,8 +18,8 @@
     <header>
         <div id="secret-trigger" title=""></div>
         <div class="banner-content">
-            <p class="banner-text">永不期待 永不假设 永不强求</p>
-            <p class="banner-text">爱自己 爱生活 爱这个世界</p>
+            <!-- <p class="banner-text">永不期待 永不假设 永不强求</p> -->
+            <p class="banner-text">爱王蓉 爱自己 爱这个世界</p>
             <div class="banner-buttons">
                 <a href="fireworks.html" class="btn btn-past">过去你好</a>
                 <button id="btn-secret" class="btn btn-secret">想对你说</button>
@@ -33,6 +34,19 @@
     <div class="container">
         <div class="timeline" id="timeline-container">
             <!-- Entries will be injected here by JS -->
+        </div>
+    </div>
+
+    <!-- Cake Popup Modal -->
+    <div id="cake-modal" class="cake-overlay hidden">
+        <canvas id="cake-canvas" class="cake-canvas"></canvas>
+        <button id="close-cake" class="close-cake-btn">关闭</button>
+        <div id="cake-hint" class="cake-hint">点击蜡烛吹灭它！</div>
+        
+        <!-- Lyrics Video Container -->
+        <div id="lyrics-video-container" class="lyrics-video-container hidden">
+            <button id="close-lyrics" class="close-lyrics-btn">关闭</button>
+            <video id="lyrics-video" src="dist/assets/向蓉而行_lyricsvideo_v_5.mp4" class="lyrics-video" controls loop playsinline></video>
         </div>
     </div>
 
@@ -177,6 +191,7 @@
     <!-- Supabase SDK (Modern Alternative to LeanCloud) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/diary.js"></script>
+    <script src="js/cake.js"></script>
 </body>
 
 </html>
