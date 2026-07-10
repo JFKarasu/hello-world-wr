@@ -4,6 +4,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     background-color: rgba(0, 0, 0, 0.95);
     z-index: 99999;
     display: flex;
@@ -13,6 +15,10 @@
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
     
     &.visible {
         opacity: 1;
@@ -33,14 +39,16 @@
 
     .close-cake-btn {
         position: absolute;
-        top: 5vh;
-        right: 5vw;
+        top: max(5vh, env(safe-area-inset-top));
+        right: max(5vw, env(safe-area-inset-right));
+        min-height: 44px;
+        min-width: 44px;
         height: 5vh;
         padding: 0 3vw;
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: #fff;
-        border-radius: 2.5vh; // 圆角半角化（高度的一半）
+        border-radius: 2.5vh;
         cursor: pointer;
         z-index: 100000;
         font-size: 2vh;
@@ -48,8 +56,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
 
-        &:hover {
+        &:hover, &:active {
             background: rgba(255, 255, 255, 0.2);
         }
     }
@@ -87,6 +97,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     background-color: rgba(0, 0, 0, 0.98);
     z-index: 100001;
     display: flex;
@@ -96,6 +108,7 @@
     transform: scale(0.5);
     transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     pointer-events: none;
+    -webkit-tap-highlight-color: transparent;
     
     &.visible {
         opacity: 1;
@@ -118,8 +131,10 @@
 
     .close-lyrics-btn {
         position: absolute;
-        top: 5vh;
-        right: 5vw;
+        top: max(5vh, env(safe-area-inset-top));
+        right: max(5vw, env(safe-area-inset-right));
+        min-height: 44px;
+        min-width: 44px;
         height: 5vh;
         padding: 0 3vw;
         background: rgba(255, 255, 255, 0.1);
@@ -133,8 +148,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
 
-        &:hover {
+        &:hover, &:active {
             background: rgba(255, 255, 255, 0.2);
         }
     }

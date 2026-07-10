@@ -526,10 +526,17 @@ function initCakeEffect() {
             // Force reflow
             void lyricsContainer.offsetWidth;
             lyricsContainer.classList.add('visible');
-            // Play video
+            // Play video - handle mobile autoplay restrictions
             if (lyricsVideo) {
                 lyricsVideo.currentTime = 0;
-                lyricsVideo.play().catch(e => console.log('Video play error:', e));
+                // Try to play, handle mobile restrictions
+                const playPromise = lyricsVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.log('Video play error:', e);
+                        // On mobile, show a play button or prompt if needed
+                    });
+                }
             }
         }
     }
@@ -811,14 +818,22 @@ function initCakeEffect() {
     });
     
     // Add blow candle event listeners
+    let lastTouchTime = 0;
     canvas.addEventListener('click', (e) => {
-        handleBlowCandle(e);
-        handleDoubleClick(e);
+        const now = Date.now();
+        if (now - lastTouchTime > 300) { // Debounce
+            handleBlowCandle(e);
+            handleDoubleClick(e);
+        }
     });
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        handleBlowCandle(e);
-        handleDoubleClick(e);
+        const now = Date.now();
+        if (now - lastTouchTime > 300) { // Debounce
+            lastTouchTime = now;
+            handleBlowCandle(e);
+            handleDoubleClick(e);
+        }
     }, { passive: false });
     
     // Show popup on enter

@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>过去今天和明天</title>
     <link rel="stylesheet" href="css/diary.css">
     <link rel="stylesheet" href="css/cake.scss">
@@ -46,7 +49,7 @@
         <!-- Lyrics Video Container -->
         <div id="lyrics-video-container" class="lyrics-video-container hidden">
             <button id="close-lyrics" class="close-lyrics-btn">关闭</button>
-            <video id="lyrics-video" src="dist/assets/向蓉而行_lyricsvideo_v_5.mp4" class="lyrics-video" controls loop playsinline></video>
+            <video id="lyrics-video" src="dist/assets/向蓉而行_lyricsvideo_v_5.mp4" class="lyrics-video" controls loop playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" preload="metadata"></video>
         </div>
     </div>
 
