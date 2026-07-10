@@ -555,6 +555,30 @@ function initCakeEffect() {
         }
     }
     
+    // Close cake modal - also close video if open
+    function closeModal() {
+        modal.classList.remove('visible');
+        // Also close video if it's open
+        if (lyricsContainer && lyricsContainer.classList.contains('visible')) {
+            closeLyricsVideo();
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            // Stop microphone
+            if (microphoneStream) {
+                microphoneStream.getTracks().forEach(track => track.stop());
+                microphoneStream = null;
+            }
+            isListening = false;
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+        }, 500); // match transition time
+    }
+    
     // Handle click/touch event to blow candle
     function handleBlowCandle(event) {
         if (allCandlesBlown) return;
@@ -785,24 +809,7 @@ function initCakeEffect() {
         initMicrophone();
     }
 
-    function closeModal() {
-        modal.classList.remove('visible');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-            // Stop microphone
-            if (microphoneStream) {
-                microphoneStream.getTracks().forEach(track => track.stop());
-                microphoneStream = null;
-            }
-            isListening = false;
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
-        }, 500); // match transition time
-    }
+
 
     closeBtn.addEventListener('click', closeModal);
     
