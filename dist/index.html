@@ -3,12 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>过去今天和明天</title>
     <!-- Google Fonts for Atmosphere -->
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" crossorigin href="/assets/index-COXfNVVw.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-Bd4Ly6rm.css">
 </head>
 
 <body>
@@ -36,6 +39,19 @@
         </div>
     </div>
 
+    <!-- Cake Popup Modal -->
+    <div id="cake-modal" class="cake-overlay hidden">
+        <canvas id="cake-canvas" class="cake-canvas"></canvas>
+        <button id="close-cake" class="close-cake-btn">关闭</button>
+        <div id="cake-hint" class="cake-hint">点击蜡烛吹灭它！</div>
+    </div>
+
+    <!-- Lyrics Video Container - separate layer -->
+    <div id="lyrics-video-container" class="lyrics-video-container hidden">
+        <button id="close-lyrics" class="close-lyrics-btn">关闭</button>
+        <video id="lyrics-video" src="/assets/%E5%90%91%E8%93%89%E8%80%8C%E8%A1%8C_lyricsvideo_v_5-Ip8i3PI1.mp4" class="lyrics-video" controls loop playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" preload="metadata"></video>
+    </div>
+
     <!-- Add New Entry Page (Overlay) -->
     <div id="add-page">
         <div class="form-container">
@@ -47,7 +63,7 @@
             <form id="add-entry-form">
                 <div class="form-group">
                     <label for="entry-date">日期</label>
-                    <input type="date" id="entry-date" required>
+                    <input type="datetime-local" id="entry-date" required>
                 </div>
 
                 <div class="form-group">
@@ -177,6 +193,7 @@
     <!-- Supabase SDK (Modern Alternative to LeanCloud) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/diary.js"></script>
+    <script src="js/cake.js"></script>
 </body>
 
 </html>

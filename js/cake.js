@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const scale = Math.min(this.width, this.height) / 120;
             const centerX = this.width / 2;
-            const centerY = this.height / 2 - scale * 20;
+            const centerY = this.height / 2 - scale * 30;
             
             this.ctx.globalCompositeOperation = 'lighter';
             
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const sinX = Math.sin(angleX);
                             const scale = Math.min(this.width, this.height) / 120;
                             const centerX = this.width / 2;
-                            const centerY = this.height / 2 - scale * 20;
+                            const centerY = this.height / 2 - scale * 30;
                             
                             const bottomY = -3;
                             const flameY = bottomY - 6 - 1 - 2;
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sinX = Math.sin(angleX);
             const scale = Math.min(this.width, this.height) / 120;
             const centerX = this.width / 2;
-            const centerY = this.height / 2 - scale * 20;
+            const centerY = this.height / 2 - scale * 30;
             
             for (let i = 0; i < this.candlePositions.length; i++) {
                 const candle = this.candlePositions[i];
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sinX = Math.sin(angleX);
             const scale = Math.min(this.width, this.height) / 120;
             const centerX = this.width / 2;
-            const centerY = this.height / 2 - scale * 20;
+            const centerY = this.height / 2 - scale * 30;
             
             for (let i = 0; i < this.candlePositions.length; i++) {
                 const candle = this.candlePositions[i];
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sinX = Math.sin(angleX);
             const scale = Math.min(this.width, this.height) / 120;
             const centerX = this.width / 2;
-            const centerY = this.height / 2 - scale * 20;
+            const centerY = this.height / 2 - scale * 30;
             
             for (let i = 0; i < this.candlePositions.length; i++) {
                 const candle = this.candlePositions[i];
@@ -703,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const sinX = Math.sin(angleX);
                 const scale = Math.min(this.width, this.height) / 120;
                 const centerX = this.width / 2;
-                const centerY = this.height / 2 - scale * 20;
+                const centerY = this.height / 2 - scale * 30;
                 
                 const bottomY = -3;
                 const flameY = bottomY - 6 - 1 - 2;
