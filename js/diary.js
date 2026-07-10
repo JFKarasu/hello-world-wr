@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add "Now" badge at the top
         const nowDiv = document.createElement('div');
         nowDiv.className = 'timeline-now';
-        nowDiv.innerText = 'Now';
+        nowDiv.innerText = '真心';
         nowDiv.style.cursor = 'pointer';
         nowDiv.addEventListener('click', show3DHeartEffect);
         timelineContainer.appendChild(nowDiv);
