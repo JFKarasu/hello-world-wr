@@ -14,6 +14,50 @@
   <link rel="stylesheet" crossorigin href="/assets/index-Bd4Ly6rm.css">
   <style>
     header, .container { display: none; }
+    
+    .birthday-message-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2500;
+        color: white;
+        font-family: 'Noto Serif SC', serif;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+        pointer-events: none;
+    }
+    .birthday-message-container.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .birthday-message-content p {
+        margin: 6px 0;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .birthday-message-content p.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .birthday-message-content p:nth-child(1),
+    .birthday-message-content p:nth-last-child(2),
+    .birthday-message-content p:nth-last-child(1) {
+        font-weight: bold;
+        font-size: 1.3rem;
+        color: #ffb6c1;
+        margin: 12px 0;
+    }
   </style>
 </head>
 
@@ -46,7 +90,28 @@
     <div id="cake-modal" class="cake-overlay hidden">
         <canvas id="cake-canvas" class="cake-canvas"></canvas>
         <button id="close-cake" class="close-cake-btn">关闭</button>
-        <div id="cake-hint" class="cake-hint">点击蜡烛吹灭它！</div>
+        <div id="cake-hint" class="cake-hint">摇动手机或点击蜡烛吹灭它！</div>
+    </div>
+
+    <!-- Birthday Message Container -->
+    <div id="birthday-message-container" class="birthday-message-container hidden" style="display: none;">
+        <div class="birthday-message-content">
+            <p>蓉宝</p>
+            <p>不能亲手送上礼物</p>
+            <p>这份遗憾一直搁在心里</p>
+            <p>自知能力有限</p>
+            <p>虽然歌词由我亲手写下</p>
+            <p>但旋律还是交由 AI 谱曲</p>
+            <p>不过并不影响这份心意</p>
+            <p>就让这首独属于你的歌代替生日歌</p>
+            <p>带着我</p>
+            <p>满心的惦念</p>
+            <p>坚定的态度</p>
+            <p>真挚的祝福</p>
+            <p>悉数送到你身边</p>
+            <p>生日快乐！！！</p>
+            <p>我最爱的宝贝！！！</p>
+        </div>
     </div>
 
     <!-- Lyrics Video Container - separate layer -->
@@ -195,8 +260,8 @@
 
     <!-- Supabase SDK (Modern Alternative to LeanCloud) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/diary.js"></script>
-    <script src="js/cake.js"></script>
+    <script src="../js/diary.js"></script>
+    <script src="../js/cake.js"></script>
 </body>
 
 </html>

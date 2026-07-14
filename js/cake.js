@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lyricsContainer: document.getElementById('lyrics-video-container'),
         closeLyricsBtn: document.getElementById('close-lyrics'),
         lyricsVideo: document.getElementById('lyrics-video'),
+        birthdayMessageContainer: null,
         ctx: null,
         animationFrameId: null,
         particles: [],
@@ -140,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 添加提示
             if (this.hint) {
+                this.hint.style.display = 'block';
                 this.hint.textContent = '摇动手机或点击蜡烛吹灭它！';
             }
         },
@@ -147,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal() {
             this.modal.classList.remove('visible');
             document.body.style.overflow = '';
-            
+
             if (this.lyricsContainer && this.lyricsContainer.classList.contains('visible')) {
                 this.closeLyricsVideo();
             }
@@ -172,9 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
             this.candleStates = {};
             this.candlePositions = [];
             this.allCandlesBlown = false;
-            this.showBirthdayMessage = false;
+            this.isDissolving = false;
             this.blowParticles = [];
             this.smokeParticles = [];
+            
+            // Cleanup existing text overlay if any
+            const existingOverlay = document.getElementById('cake-text-overlay');
+            if (existingOverlay) existingOverlay.remove();
             
             this.addCylinderParticles(30, 8, 16, 2500, this.CAKE_COLOR);
             this.addCylinderParticles(24, 8, 8, 1800, this.CAKE_COLOR);
@@ -321,6 +327,18 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < this.particles.length; i++) {
                 const p = this.particles[i];
                 
+                if (this.isDissolving) {
+                    if (p.vx === undefined) {
+                        p.vx = (Math.random() - 0.5) * 3;
+                        p.vy = (Math.random() - 0.5) * 3 + 1; // fall downwards
+                        p.vz = (Math.random() - 0.5) * 3;
+                    }
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.z += p.vz;
+                    p.size *= 0.92;
+                }
+                
                 if (p.type === 'flame') {
                     const state = this.candleStates[p.candleId];
                     if (state && state.isBlown) {
@@ -389,10 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.renderBlowParticles();
             this.renderSmokeParticles();
             this.updateCandleBlowProgress();
-            
-            if (this.showBirthdayMessage) {
-                this.showLyricsVideo();
-            }
             
             this.ctx.globalCompositeOperation = 'source-over';
             this.animationFrameId = requestAnimationFrame(() => self.render());
@@ -480,8 +494,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             setTimeout(() => {
                                 this.triggerFireworks();
                                 setTimeout(() => {
-                                    this.showBirthdayMessage = true;
-                                }, 2500);
+                                    this.isDissolving = true;
+                                    setTimeout(() => {
+                                        this.showTextOnCake();
+                                    }, 1500);
+                                }, 2000);
                             }, 500);
                         }
                     }
@@ -761,8 +778,122 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
+        async showTextOnCake() {
+            // 文字出现时隐藏底部的提示词
+            if (this.hint) {
+                this.hint.style.display = 'none';
+            }
+
+            let overlay = document.getElementById('cake-text-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'cake-text-overlay';
+                overlay.style.position = 'absolute';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.color = 'white';
+                overlay.style.fontFamily = "'Noto Serif SC', serif";
+                overlay.style.textAlign = 'center';
+                overlay.style.zIndex = '10';
+                this.modal.appendChild(overlay);
+            } else {
+                overlay.innerHTML = '';
+                overlay.style.opacity = '1';
+            }
+            
+            const texts = [
+                "蓉宝",
+                "不能亲手送上礼物",
+                "这份遗憾一直搁在心里",
+                "自知能力有限",
+                "虽然歌词由我亲手写下",
+                "但旋律还是交由 AI 谱曲",
+                "不过并不影响这份心意",
+                "就让这首独属于你的歌代替生日歌",
+                "带着我",
+                "满心的惦念",
+                "坚定的态度",
+                "真挚的祝福",
+                "悉数送到你身边",
+                "生日快乐！！！",
+                "我最爱的宝贝！！！"
+            ];
+            
+            const typeWriterDelay = 120; // 每个字的打印延迟（毫秒）
+            const lineDelay = 300;       // 每行打印完后的延迟（毫秒）
+
+            for (let i = 0; i < texts.length; i++) {
+                const p = document.createElement('p');
+                p.style.margin = '6px 0';
+                p.style.lineHeight = '1.5';
+                p.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
+                
+                if (i === 0 || i === texts.length - 1 || i === texts.length - 2) {
+                    p.style.fontWeight = 'bold';
+                    p.style.fontSize = '1.3rem';
+                    p.style.color = '#ffb6c1';
+                    p.style.margin = '12px 0';
+                } else {
+                    p.style.fontSize = '1.1rem';
+                }
+                
+                // 先将 p 标签添加到容器中，内容为空
+                p.textContent = '';
+                overlay.appendChild(p);
+
+                // 逐字打印
+                const text = texts[i];
+                for (let j = 0; j < text.length; j++) {
+                    p.textContent += text[j];
+                    await new Promise(resolve => setTimeout(resolve, typeWriterDelay));
+                }
+                
+                // 换行停顿
+                await new Promise(resolve => setTimeout(resolve, lineDelay));
+            }
+            
+            // 停留一段时间后消失
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Start fading out text
+            overlay.style.transition = 'opacity 1.5s ease';
+            overlay.style.opacity = '0';
+            
+            // Wait for fade out to complete, then show video
+            setTimeout(() => {
+                this.closeModalAndShowVideo();
+            }, 1500);
+        },
+
+        closeModalAndShowVideo() {
+            // First show video to cover everything
+            this.showLyricsVideo();
+            
+            // Wait for video to be visible, then hide cake modal behind it
+            setTimeout(() => {
+                this.modal.classList.remove('visible');
+                document.body.style.overflow = '';
+                
+                setTimeout(() => {
+                    this.modal.classList.add('hidden');
+                    this.ctx.clearRect(0, 0, this.width, this.height);
+                    if (this.animationFrameId) {
+                        cancelAnimationFrame(this.animationFrameId);
+                        this.animationFrameId = null;
+                    }
+                }, 500);
+            }, 100);
+        },
+
         showLyricsVideo() {
             if (!this.lyricsContainer || this.lyricsContainer.classList.contains('visible')) return;
+            this.lyricsContainer.style.zIndex = "4000";
             this.lyricsContainer.classList.remove('hidden');
             void this.lyricsContainer.offsetWidth;
             this.lyricsContainer.classList.add('visible');
@@ -787,6 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 if (this.lyricsContainer) {
                     this.lyricsContainer.classList.add('hidden');
+                    this.lyricsContainer.style.zIndex = "";
                 }
                 if (window.show3DHeartEffect) {
                     window.show3DHeartEffect();

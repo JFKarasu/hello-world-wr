@@ -633,6 +633,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // overlay.addEventListener('click', () => {
         //     overlay.remove();
         // });
+        
+        // Remove text
+        setTimeout(() => {
+            if (textElement && textElement.parentNode) {
+                textElement.remove();
+            }
+        }, 3000);
 
         const particles = [];
         const particleCount = 5000;
