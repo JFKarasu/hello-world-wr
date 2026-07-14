@@ -17,13 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
         blowParticles: [],
         smokeParticles: [],
         showBirthdayMessage: false,
-        audioContext: null,
-        analyser: null,
-        microphoneStream: null,
-        isListening: false,
+
         width: window.innerWidth,
         height: window.innerHeight,
         angleY: 0,
+        lastShakeTime: 0,
+        lastAcceleration: { x: null, y: null, z: null },
+        shakeThreshold: 15, // Adjust as needed
+        shakeTimeThreshold: 500, // milliseconds
         
         CAKE_COLOR: 'rgba(0, 220, 255, 0.8)',
         CANDLE_COLOR: 'rgba(255, 255, 255, 0.9)',
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Blow candle events
             let lastTouchTime = 0;
+            
             this.canvas.addEventListener('click', (e) => {
                 const now = Date.now();
                 if (now - lastTouchTime > 300) {
@@ -85,6 +87,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     self.handleDoubleClick(e);
                 }
             }, { passive: false });
+
+            // Shake detection
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', (event) => {
+                    const acceleration = event.accelerationIncludingGravity;
+                    const now = Date.now();
+
+                    if (!self.lastAcceleration.x) {
+                        self.lastAcceleration.x = acceleration.x;
+                        self.lastAcceleration.y = acceleration.y;
+                        self.lastAcceleration.z = acceleration.z;
+                        return;
+                    }
+
+                    const deltaX = Math.abs(acceleration.x - self.lastAcceleration.x);
+                    const deltaY = Math.abs(acceleration.y - self.lastAcceleration.y);
+                    const deltaZ = Math.abs(acceleration.z - self.lastAcceleration.z);
+
+                    if ((deltaX + deltaY + deltaZ > self.shakeThreshold) && (now - self.lastShakeTime > self.shakeTimeThreshold)) {
+                        self.lastShakeTime = now;
+                        self.blowCandleOnShake(); // New function to blow a candle
+                    }
+
+                    self.lastAcceleration.x = acceleration.x;
+                    self.lastAcceleration.y = acceleration.y;
+                    self.lastAcceleration.z = acceleration.z;
+                });
+            }
         },
 
         resizeCanvas() {
@@ -108,7 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             this.render();
             
-            this.initMicrophone();
+            // 添加提示
+            if (this.hint) {
+                this.hint.textContent = '摇动手机或点击蜡烛吹灭它！';
+            }
         },
 
         closeModal() {
@@ -121,14 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             setTimeout(() => {
                 this.modal.classList.add('hidden');
+                if (window.show3DHeartEffect) {
+                    window.show3DHeartEffect();
+                }
                 if (this.animationFrameId) {
                     cancelAnimationFrame(this.animationFrameId);
                     this.animationFrameId = null;
                 }
-                if (this.microphoneStream) {
-                    this.microphoneStream.getTracks().forEach(track => track.stop());
-                    this.microphoneStream = null;
-                }
+
                 this.isListening = false;
                 this.ctx.clearRect(0, 0, this.width, this.height);
             }, 500);
@@ -469,48 +502,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        async initMicrophone() {
-            try {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                this.analyser = this.audioContext.createAnalyser();
-                this.analyser.fftSize = 256;
-                
-                this.microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const source = this.audioContext.createMediaStreamSource(this.microphoneStream);
-                source.connect(this.analyser);
-                
-                this.isListening = true;
-                if (this.hint) this.hint.textContent = '对着麦克风吹气或点击蜡烛吹灭它！';
-                this.processMicrophoneInput();
-            } catch (e) {
-                console.log('Microphone access denied:', e);
-                if (this.hint) this.hint.textContent = '点击蜡烛吹灭它！';
-            }
-        },
 
-        processMicrophoneInput() {
-            if (!this.isListening || !this.analyser) return;
-            
-            const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-            this.analyser.getByteFrequencyData(dataArray);
-            
-            let sum = 0;
-            let count = 0;
-            for (let i = 30; i < dataArray.length; i++) {
-                sum += dataArray[i];
-                count++;
-            }
-            const avgVolume = sum / count;
-            
-            if (avgVolume > 80) {
-                this.tryBlowNearestCandle(avgVolume);
-            }
-            
-            requestAnimationFrame(() => this.processMicrophoneInput());
-        },
 
         tryBlowNearestCandle(volume) {
-            const blowStrength = Math.min((volume - 80) / 50, 1);
+            const blowStrength = Math.min((volume - 40) / 60, 1);
             
             let nearestCandle = null;
             let nearestDist = Infinity;
@@ -553,6 +548,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (this.candleStates[nearestCandle.id].blowProgress > 1) {
                     this.candleStates[nearestCandle.id].blowProgress = 1;
                 }
+            }
+        },
+
+        blowCandleOnShake() {
+            // Find an unblown candle and blow it
+            const unblownCandles = this.candlePositions.filter(c => !this.candleStates[c.id].isBlown);
+            if (unblownCandles.length > 0) {
+                // For simplicity, just blow the first unblown candle found
+                const candleToBlow = unblownCandles[0];
+
+                // To call blowCandle, we need screen coordinates. Let's approximate them to center of canvas.
+                const dummyX = this.width / 2;
+                const dummyY = this.height / 2;
+                this.blowCandle(candleToBlow.id, dummyX, dummyY);
             }
         },
 
@@ -778,6 +787,9 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 if (this.lyricsContainer) {
                     this.lyricsContainer.classList.add('hidden');
+                }
+                if (window.show3DHeartEffect) {
+                    window.show3DHeartEffect();
                 }
             }, 500);
         }

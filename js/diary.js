@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 3D Particle Heart Effect Logic
-    function show3DHeartEffect() {
+    window.show3DHeartEffect = function() {
         if (document.getElementById('heart-3d-overlay')) return;
 
         const overlay = document.createElement('div');
@@ -630,9 +630,9 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.height = height;
         });
 
-        overlay.addEventListener('click', () => {
-            overlay.remove();
-        });
+        // overlay.addEventListener('click', () => {
+        //     overlay.remove();
+        // });
 
         const particles = [];
         const particleCount = 5000;
