@@ -29,24 +29,43 @@ function inferRoleFromAccount(){
     // 勾选了记住账号，保存到本地
     localStorage.setItem('savedAccount', account);
     localStorage.setItem('savedPassword', password);
+    // 同时保存一个模拟的 token/role，用于直接跳过登录页
+    localStorage.setItem('userToken', demoAccounts[account]);
   } else {
     // 没勾选，清除本地保存的记录
     localStorage.removeItem('savedAccount');
     localStorage.removeItem('savedPassword');
+    localStorage.removeItem('userToken');
   }
   
   return demoAccounts[account] || null; // 如果账号不存在也返回null
 }
 
-// 页面加载时恢复保存的账号密码
-window.addEventListener('DOMContentLoaded', () => {
+// 页面加载时恢复保存的账号密码并自动登录
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedToken = localStorage.getItem('userToken');
+  
+  if (savedToken) {
+    // 如果有 token，直接进入主应用，不再展示登录界面
+    role = savedToken;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    
+    Swal.fire({ title: '加载中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+    await fetchMemories();
+    render();
+    Swal.close();
+    return;
+  }
+  
+  // 如果没有 token，但有保存的账号密码，回显在输入框
   const savedAccount = localStorage.getItem('savedAccount');
   const savedPassword = localStorage.getItem('savedPassword');
+  const rememberCheckbox = document.getElementById('rememberMe');
   
   if (savedAccount && savedPassword) {
     const accountInput = document.querySelector('#login input:not([type="password"])');
     const passwordInput = document.querySelector('#login input[type="password"]');
-    const rememberCheckbox = document.getElementById('rememberMe');
     
     if (accountInput) accountInput.value = savedAccount;
     if (passwordInput) passwordInput.value = savedPassword;
@@ -55,18 +74,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchMemories() {
-  const defaultMemory = {
-    id: 'default-1',
-    date_str: '2月14日',
-    title: '送给你一年的想念',
-    content: '这个情人节，我知道自己什么都送不了，但依然想要做些什么，就想到送你365个“我还在想你”的瞬间。一年以后，你可以从今天开始，把我这一年的想念重新走一遍……',
-    weather: '☀️ 晴天',
-    mood: '😊 开心',
-    location: '📍 南京',
-    image_urls: ['assets/images/d0c2def3-22a4-4709-81a7-04e7b50f9795.png'],
-    reactions: []
-  };
-
   try {
     const { data, error } = await supabaseClient
       .from('memories')
@@ -75,20 +82,20 @@ async function fetchMemories() {
       
     if (error) {
       console.error("Supabase Select Error:", error);
-      // 如果数据库查询失败，也使用写死的数据兜底
-      memories = [defaultMemory];
+      memories = [];
       return;
     }
     
+    console.log("Fetched raw data from Supabase:", data); // Debugging output to see what was actually retrieved
+    
     if (data && data.length > 0) {
-      // 将获取到的数据与写死的第一条数据合并，写死的数据放在最后（最早的时间）
-      memories = [...data, defaultMemory];
+      memories = data;
     } else {
-      memories = [defaultMemory];
+      memories = [];
     }
   } catch (err) {
     console.error("加载数据失败:", err);
-    memories = [defaultMemory];
+    memories = [];
   }
 }
 
@@ -105,11 +112,8 @@ async function enter(){
     return;
   }
   
-  const btn = document.querySelector('#login .primary');
-  const originalText = btn.innerText;
-  btn.innerText = '加载中...';
-  btn.disabled = true;
-
+  Swal.fire({ title: '加载中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+  
   await fetchMemories();
   
   role = assignedRole;
@@ -117,8 +121,7 @@ async function enter(){
   document.getElementById('app').classList.remove('hidden');
   render();
   
-  btn.innerText = originalText;
-  btn.disabled = false;
+  Swal.close();
 }
 
 function navItem(id,label,icon){return `<button class="nav-btn ${current===id?'active':''}" onclick="go('${id}')"><span class="icon">${icon}</span><span class="label">${label}</span></button>`}
@@ -201,20 +204,9 @@ async function saveMemory() {
   
   const dateObj = new Date();
   const dateStr = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
-  
-  // Create an ISO string for created_at to avoid Supabase parsing errors if we accidentally map fields incorrectly, 
-  // or just ensure we don't insert dateStr into a timestamp field. 
-  // According to error: invalid input syntax for type timestamp with time zone: "8月19日"
-  // It means date_str in Supabase might be set as timestamp instead of text, or we are mapping it wrong.
-  // Wait, let's just insert it and check if we are inserting dateStr into date_str which is supposed to be TEXT.
-  // If Supabase created date_str as timestamp, we need to pass a real ISO date to date_str and format it on frontend.
-  // Let's pass the ISO string if the backend expects a timestamp.
   const isoDate = dateObj.toISOString();
   
-  const btn = document.querySelector('.write-actions .primary');
-  const originalText = btn.innerText;
-  btn.innerText = '保存中...';
-  btn.disabled = true;
+  Swal.fire({ title: '保存中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
   try {
     const payload = { 
@@ -263,17 +255,20 @@ async function saveMemory() {
     }
     
   } catch (err) {
-    console.error("保存失败:", err);
-    Swal.fire({
-      icon: 'error',
-      title: '保存失败',
-      text: '请检查网络或数据库配置',
-      confirmButtonColor: '#d46373'
-    });
-  } finally {
-    btn.innerText = originalText;
-    btn.disabled = false;
-  }
+      console.error("保存失败:", err);
+      Swal.fire({
+        icon: 'error',
+        title: '保存失败',
+        text: '请检查网络或数据库配置',
+        confirmButtonColor: '#d46373'
+      });
+    } finally {
+      const btn = document.querySelector('.write-actions .primary');
+      if (btn) {
+        btn.innerText = '保存今天的想念 ♥';
+        btn.disabled = false;
+      }
+    }
 }
 
 async function setMood() {
@@ -442,7 +437,8 @@ function calendar(){
     return `<div class="day ${isDot}${isToday}">${d}</div>`;
   }).join('');
   
-  return `<div class="card"><div class="calendar-head"><button onclick="changeMonth(-1)">‹</button><b>${year}年${month + 1}月</b><button onclick="changeMonth(1)">›</button></div><div class="week">${['日','一','二','三','四','五','六'].map(x=>`<div>${x}</div>`).join('')}</div><div class="days">${daysHtml}</div><button style="margin-top:15px;width:100%;padding:11px;border-radius:12px;background:#fff0f2;color:#d46373" onclick="go('records')">查看全部记录</button></div>`;
+  // 注意去掉了这里的外层 margin，由父容器统一控制
+  return `<div class="card calendar-card"><div class="calendar-head"><button onclick="changeMonth(-1)">‹</button><b>${year}年${month + 1}月</b><button onclick="changeMonth(1)">›</button></div><div class="week">${['日','一','二','三','四','五','六'].map(x=>`<div>${x}</div>`).join('')}</div><div class="days">${daysHtml}</div><button style="margin-top:15px;width:100%;padding:11px;border-radius:12px;background:#fff0f2;color:#d46373" onclick="go('records')">查看全部记录</button></div>`;
 }
 function viewImage(src) {
   Swal.fire({
@@ -461,8 +457,18 @@ function viewImage(src) {
 
 function renderMemoryMeta(m) {
   let html = '';
-  if (m.image_urls && m.image_urls.length > 0) {
-    html += `<div style="margin-top:10px;"><img src="${m.image_urls[0]}" onclick="viewImage('${m.image_urls[0]}')" style="max-height:120px; border-radius:8px; border:1px solid #eee; object-fit:cover; cursor:pointer;"></div>`;
+  // Safely parse image_urls in case Supabase returns it as a stringified JSON array
+  let images = m.image_urls;
+  if (typeof images === 'string') {
+    try {
+      images = JSON.parse(images);
+    } catch (e) {
+      images = [images]; // Fallback if it's just a raw string URL
+    }
+  }
+  
+  if (images && Array.isArray(images) && images.length > 0) {
+    html += `<div style="margin-top:10px;"><img src="${images[0]}" onclick="viewImage('${images[0]}')" style="max-width:50%; height:auto; border-radius:8px; border:1px solid #eee; cursor:pointer;"></div>`;
   }
   let tags = '';
   if (m.mood) tags += `<span style="display:inline-block; font-size:12px; background:#fff0f5; color:#e83e8c; padding:4px 10px; border-radius:12px; margin-right:8px; margin-top:8px; border:1px solid #fbcfe8;">${m.mood}</span>`;
@@ -474,8 +480,60 @@ function renderMemoryMeta(m) {
   return html;
 }
 
-function recent(){return `<div class="card timeline"><h2>最近的想念 <span class="sub" style="float:right">查看全部 →</span></h2>${memories.slice(0,4).map((m,i)=>`<div class="memory"><div class="date"><div>${m.date_str}</div><div class="heartline"></div></div><div><h3>${m.title || '日常想念'}</h3><p>${m.content}</p>${renderMemoryMeta(m)}</div></div>`).join('')}</div>`}
-function records(){return `<div class="page-title">我的记录</div><div class="page-sub">一年里的每一个小瞬间，都值得被留下。</div><div class="grid"><div>${calendar()}</div><div>${recent()}<div class="card" style="margin-top:18px"><h2>记录统计</h2><div class="stats" style="margin-top:0"><div class="stat"><b>47</b><span>已记录</span></div><div class="stat"><b>9</b><span>照片</span></div><div class="stat"><b>12</b><span>特别想念</span></div><div class="stat"><b>31</b><span>连续记录</span></div></div></div></div></div>`}
+function recent(){return `<div class="card timeline"><h2>最近的想念 <span class="sub" style="float:right; cursor:pointer;" onclick="go('records')">查看全部 →</span></h2>${memories.slice(0,4).map((m,i)=>`<div class="memory"><div class="date"><div>${m.date_str}</div><div class="heartline"></div></div><div><h3>${m.title || '日常想念'}</h3><p>${m.content}</p>${renderMemoryMeta(m)}</div></div>`).join('')}</div>`}
+function calculateStreak() {
+  if (!memories.length) return 0;
+  
+  // 将所有记录的日期提取出来，转换为当天的零点时间戳以进行计算
+  const uniqueDates = [...new Set(memories.map(m => {
+    const d = m.created_at ? new Date(m.created_at) : new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }))].sort((a, b) => b - a); // 降序排列
+  
+  let streak = 1;
+  const oneDay = 24 * 60 * 60 * 1000;
+  
+  for (let i = 0; i < uniqueDates.length - 1; i++) {
+    const diff = Math.round((uniqueDates[i] - uniqueDates[i+1]) / oneDay);
+    if (diff === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function records(){
+  const totalRecords = memories.length;
+  const totalPhotos = memories.filter(m => {
+    let imgs = m.image_urls;
+    if (typeof imgs === 'string') {
+      try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
+    }
+    return Array.isArray(imgs) && imgs.length > 0;
+  }).length;
+  const totalSpecial = memories.filter(m => m.is_special).length;
+  const streak = calculateStreak();
+  
+  // 给左侧的日历和右侧的内容区分别加上 height: max-content 或者去除外边距
+  return `<div class="page-title">我的记录</div><div class="page-sub">一年里的每一个小瞬间，都值得被留下。</div>
+  <div class="grid" style="align-items: start;">
+    <div style="height: max-content;">${calendar()}</div>
+    <div style="height: max-content;">
+      ${recent()}
+      <div class="card" style="margin-top:18px">
+        <h2>记录统计</h2>
+        <div class="stats" style="margin-top:0">
+          <div class="stat"><b>${totalRecords}</b><span>已记录</span></div>
+          <div class="stat"><b>${totalPhotos}</b><span>照片</span></div>
+          <div class="stat"><b>${totalSpecial}</b><span>特别想念</span></div>
+          <div class="stat"><b>${streak}</b><span>连续记录</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
 function timeline(){
   return `<div class="page-title">${role==='owner'?'我们的想念时间轴':'他留给你的时间轴'}</div><div class="page-sub">${role==='owner'?'把这一年慢慢写成一本书。':'从第一天开始，重新走一遍这一年的想念。'}</div><div class="card">${memories.map((m) => {
     let reactionHtml = '';
@@ -489,8 +547,7 @@ function timeline(){
 }
 
 async function addReaction(memoryId, reactionType) {
-  const container = document.getElementById(`reaction-container-${memoryId}`);
-  if (container) container.innerHTML = `<span style="color:#999;font-size:14px;">发送中...</span>`;
+  Swal.fire({ title: '发送中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
   
   try {
     const { error } = await supabaseClient
@@ -506,6 +563,7 @@ async function addReaction(memoryId, reactionType) {
     // 重新拉取数据并渲染页面
     await fetchMemories();
     render();
+    Swal.close();
   } catch (err) {
     console.error("互动失败:", err);
     Swal.fire({
@@ -514,13 +572,85 @@ async function addReaction(memoryId, reactionType) {
       text: '请检查网络或数据库配置',
       confirmButtonColor: '#d46373'
     });
-    if (container) container.innerHTML = `<button class="chip" onclick="addReaction(${memoryId}, '♥ 收到啦')">♥ 收到啦</button><button class="chip" onclick="addReaction(${memoryId}, '我也想你')">我也想你</button>`;
   }
 }
-function story(){return `<div class="page-title">我们的故事</div><div class="page-sub">这里不记录全部，只记录那些只有我们知道的事情。</div><div class="story"><div class="card big"><h2>我们是怎么认识的</h2><p>把第一次认识、第一次心动、第一次认真聊天的那一天写在这里。正式版可以添加照片、地点、时间与专属文字。</p></div><div class="card"><h2>特别的日期</h2><p>第一个情人节 · 2026.08.19</p></div><div class="card"><h2>只有我们知道</h2><p>一个只有你们两个人懂的暗号、一句话、一段回忆。</p></div></div>`}
-function settings(){return `<div class="page-title">设置</div><div class="page-sub">让这个小世界只属于你们。</div><div class="card settings">
-<div class="setting-row"><div><b>每日提醒</b><div class="sub">提醒自己留下今天的想念</div></div><div class="switch"></div></div>
-<div class="setting-row"><div><b>私密模式</b><div class="sub">草稿默认只有自己可见</div></div><div class="switch"></div></div>
-<div class="setting-row"><div><b>纪念日</b><div class="sub">2027年2月14日 · 一年后的情人节</div></div><span>♡</span></div>
-<div class="setting-row"><div><b>关系身份</b><div class="sub">${role==='owner'?'记录的人':'收到的人'}</div></div><span>›</span></div>
+function story(){
+  return `<div class="page-title">我们的故事</div>
+  <div class="page-sub">那些只有我们知道的秘密和闪闪发光的日子。</div>
+  <div class="card" style="margin-bottom:20px">
+    <h2>特别的日期</h2>
+    <div style="margin-top:15px; display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid #f0f0f0;">
+        <div>
+          <div style="font-weight:bold; color:#d46373; font-size:15px;">🌹 七夕情人节</div>
+          <div style="font-size:13px; color:#888; margin-top:4px;">想你的365天，从今天开始</div>
+        </div>
+        <div style="color:#333; align-self:center; font-weight:bold;">2026.08.19</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid #f0f0f0;">
+        <div>
+          <div style="font-weight:bold; color:#d46373; font-size:16px;">🎂 她的生日</div>
+          <div style="font-size:13px; color:#888; margin-top:4px;">为你准备的专属惊喜</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="color:#333; font-weight:bold; font-size:14px;">2026.07.15</div>
+          <button class="chip" style="margin:0;" onclick="window.location.href='old_index.html'">打开惊喜</button>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid #f0f0f0;">
+        <div>
+          <div style="font-weight:bold; color:#d46373; font-size:16px;">🎆 除夕跨年</div>
+          <div style="font-size:13px; color:#888; margin-top:4px;">想和你一起看的新年烟花</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="color:#333; font-weight:bold; font-size:14px;">2026.02.16</div>
+          <button class="chip" style="margin:0;" onclick="window.location.href='fireworks.html'">看烟花</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>我们的暗号</h2>
+    <p style="color:#666; line-height:1.8; margin-top:10px;">
+      <b>“早点睡吧”</b> = 内个这个或那个<br>
+    </p>
+  </div>`;
+}
+function logout() {
+  Swal.fire({
+    title: '退出登录?',
+    text: "退出后需要重新输入账号密码",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d46373',
+    cancelButtonColor: '#ccc',
+    confirmButtonText: '确定退出',
+    cancelButtonText: '取消'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem('userToken');
+      // 可以选择保留账号密码方便下次登录，或者一并清除
+      // localStorage.removeItem('savedAccount');
+      // localStorage.removeItem('savedPassword');
+      
+      // 恢复页面状态
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login').classList.remove('hidden');
+      
+      // 重置状态
+      current = 'home';
+      memories = [];
+    }
+  });
+}
+
+function settings(){return `<div class="page-title">设置</div><div class="page-sub">让这个小世界只属于你们。</div>
+<div class="card settings" style="margin-bottom: 20px;">
+  <div class="setting-row"><div><b>每日提醒</b><div class="sub">提醒自己留下今天的想念</div></div><div class="switch"></div></div>
+  <div class="setting-row"><div><b>私密模式</b><div class="sub">草稿默认只有自己可见</div></div><div class="switch"></div></div>
+  <div class="setting-row"><div><b>纪念日</b><div class="sub">2027年2月14日 · 一年后的情人节</div></div><span>♡</span></div>
+  <div class="setting-row" style="border-bottom:none;"><div><b>关系身份</b><div class="sub">${role==='owner'?'记录的人':'收到的人'}</div></div><span>›</span></div>
+</div>
+<div class="card settings" style="padding: 0; text-align: center; overflow: hidden;">
+  <button style="width: 100%; padding: 18px; background: transparent; color: #d46373; border: none; font-size: 16px; font-weight: bold; cursor: pointer;" onclick="logout()">退出登录</button>
 </div>`}
