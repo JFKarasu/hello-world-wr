@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>想你的365天 · Romantic Memory App</title>
+<style>
+:root{
+  --bg:#fff8f5;--paper:#fffdfb;--pink:#f47f91;--pink2:#ffd9df;--rose:#b85d70;
+  --peach:#ffe7d4;--gold:#c99a62;--text:#4c3036;--muted:#9b7b80;--line:#f1dfe0;
+  --shadow:0 18px 55px rgba(174,104,119,.12);--radius:24px;
+}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#fffaf8,#fff4f1);
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:var(--text)}
+button,input,textarea{font:inherit} button{cursor:pointer;border:0}
+.app{min-height:100vh}.hidden{display:none!important}
+.topbar{height:76px;background:rgba(255,253,251,.88);backdrop-filter:blur(18px);border-bottom:1px solid #f6e7e4;
+display:flex;align-items:center;padding:0 5vw;position:sticky;top:0;z-index:20}
+.brand{display:flex;gap:12px;align-items:center;min-width:230px}.logo{width:42px;height:42px;border-radius:50%;
+display:grid;place-items:center;background:linear-gradient(145deg,#ff9eaa,#f06e84);color:#fff;font-size:21px;box-shadow:0 8px 20px #ef9baa55}
+.brand strong{font-family:"STKaiti","KaiTi",serif;font-size:21px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.nav{display:flex;gap:8px;flex:1;justify-content:center}.nav button{padding:10px 15px;background:transparent;color:#74565c;border-radius:999px}
+.nav button.active,.nav button:hover{background:#fff0f2;color:#e85f76}.profile{display:flex;align-items:center;gap:9px;color:#76565c}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(145deg,#ffd5bf,#f38ca0);display:grid;place-items:center}
+.shell{max-width:1220px;margin:auto;padding:38px 22px 90px}.hero{border-radius:34px;min-height:390px;padding:58px 6%;
+background:radial-gradient(circle at 72% 30%,#fff 0 3%,transparent 4%),linear-gradient(120deg,#ffe8d6,#ffdce1 55%,#fff0dd);
+position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;right:-90px;top:-130px;background:#ffffff55}
+.hero h1{font-family:"STKaiti","KaiTi",serif;font-size:64px;line-height:1.05;margin:20px 0 14px;color:#8b4b57;font-weight:500}
+.hero p{font-family:"STKaiti","KaiTi",serif;font-size:20px;line-height:1.8;max-width:470px;color:#875f64}
+.hero-art{position:absolute;right:8%;bottom:0;width:330px;height:290px}.lamp{position:absolute;right:120px;bottom:42px;width:90px;height:170px;border-radius:45px 45px 22px 22px;background:linear-gradient(#fff,#f7e7d4);box-shadow:0 0 80px #fff1b9}
+.lamp:after{content:"♡";position:absolute;left:29px;top:55px;font-size:34px;color:#f07f8f}.book{position:absolute;right:20px;bottom:0;width:260px;height:110px;background:#fff8ef;border-radius:9px 20px 12px 6px;transform:rotate(-4deg);box-shadow:0 15px 25px #9d6c5a22}.book:before{content:"今天也想你";position:absolute;left:50px;top:34px;font-family:"STKaiti","KaiTi",serif;color:#b36b72;font-size:23px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px}.stat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 30px #a76b7710}.stat b{font-size:28px;color:#9a4d5d}.stat span{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+.grid{display:grid;grid-template-columns:330px 1fr;gap:20px;margin-top:22px}.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}.card h2{margin:0 0 16px;font-size:20px}.sub{color:var(--muted);font-size:13px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.calendar-head button{background:#fff3f4;color:#c86675;border-radius:10px;width:32px;height:32px}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}.week{color:#b28e94;font-size:11px;margin-bottom:7px}.day{aspect-ratio:1;border-radius:12px;display:grid;place-items:center;font-size:12px;color:#6d5358;position:relative}.day.dot:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#f47f91;bottom:5px}.day.today{background:#f47f91;color:#fff}.day.today:after{background:#fff}.write{background:linear-gradient(135deg,#fff7f7,#fff);border:1px solid #f2dfe1;border-radius:18px;padding:18px}.write textarea{width:100%;height:165px;border:0;outline:0;resize:none;background:transparent;color:var(--text);font-size:16px;line-height:1.8}.write textarea::placeholder{color:#c8aaae}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}.chip{background:#fff1f3;color:#9e616b;border:1px solid #f5d9dd;padding:8px 11px;border-radius:999px;font-size:12px}.primary{background:linear-gradient(90deg,#f47c8f,#ec647d);color:#fff;padding:12px 20px;border-radius:13px;box-shadow:0 8px 18px #ec6d8240}.write-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.timeline{margin-top:20px}.memory{display:grid;grid-template-columns:70px 1fr;gap:14px;padding:17px 0;border-bottom:1px solid #f3e6e5}.memory:last-child{border-bottom:0}.date{color:#c26b78;font-size:12px;text-align:center}.heartline{width:10px;height:10px;border-radius:50%;background:#f47f91;margin:8px auto;box-shadow:0 0 0 5px #ffe8ec}.memory h3{margin:0 0 7px;font-size:15px}.memory p{margin:0;color:#765a60;line-height:1.75;font-size:14px}.memory img{width:82px;height:62px;border-radius:12px;object-fit:cover;background:linear-gradient(135deg,#ffd9c8,#f9b9c7)}
+.page-title{font-family:"STKaiti","KaiTi",serif;font-size:38px;color:#8b4b57;margin:10px 0}.page-sub{color:var(--muted);margin-bottom:24px}.letters{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.letter{min-height:190px;padding:25px;background:linear-gradient(145deg,#fff,#fff0f1);border:1px solid var(--line);border-radius:22px;position:relative}.envelope{font-size:42px}.letter h3{margin:14px 0 7px}.lock{color:#b58a8f;font-size:12px}.story{display:grid;grid-template-columns:1fr 1fr;gap:20px}.story .big{grid-column:span 2}.story p{line-height:1.9;color:#765a60}.settings{max-width:760px}.setting-row{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}.switch{width:46px;height:27px;border-radius:20px;background:#f47f91;position:relative}.switch:after{content:"";position:absolute;width:21px;height:21px;right:3px;top:3px;background:#fff;border-radius:50%}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 20% 20%,#ffe3d7,transparent 30%),linear-gradient(135deg,#fffaf6,#ffe9ed)}
+.loginbox{width:min(450px,100%);background:#fffdfcdd;backdrop-filter:blur(20px);border:1px solid #f4dedf;border-radius:30px;padding:36px;box-shadow:var(--shadow);text-align:center}.loginbox .logo{margin:auto}.loginbox h1{font-family:"STKaiti","KaiTi",serif;font-weight:500;font-size:38px;margin:18px 0 4px}.loginbox p{color:var(--muted);line-height:1.7}.field{margin:12px 0;text-align:left}.field label{display:block;font-size:12px;color:#8b6a70;margin:0 0 6px}.field input{width:100%;padding:13px 14px;border-radius:13px;border:1px solid #edd9da;outline:none;background:#fff}.demo{margin-top:12px;font-size:12px;color:#a47c82}.rolebar{display:flex;gap:8px;margin:18px 0}.rolebar button{flex:1;padding:10px;border-radius:12px;background:#fff2f3;color:#9b606a}.rolebar button.sel{background:#f47f91;color:#fff}
+.mobile-only{display:none}
+@media(max-width:900px){.nav{display:none}.brand{min-width:auto}.profile span{display:none}.shell{padding:20px 14px 90px}.hero{min-height:470px;padding:38px 28px}.hero h1{font-size:48px}.hero-art{right:2%;bottom:0;transform:scale(.82);transform-origin:right bottom}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.letters{grid-template-columns:1fr}.story{grid-template-columns:1fr}.story .big{grid-column:span 1}.mobile-only{display:block}.bottomnav{position:fixed;bottom:0;left:0;right:0;height:68px;background:#fffdfcf2;backdrop-filter:blur(18px);border-top:1px solid #f2dfdf;display:flex;justify-content:space-around;align-items:center;z-index:30;padding-bottom:env(safe-area-inset-bottom)}.bottomnav button{background:none;color:#8e7076;font-size:11px}.bottomnav button.active{color:#e75f77}.bottomnav i{display:block;font-style:normal;font-size:20px;margin-bottom:2px}.topbar{padding:0 15px}.hero-art{opacity:.85}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="loginbox">
+    <div class="logo">♡</div>
+    <h1>想你的365天</h1>
+    <p>每天一个想你的瞬间。<br>这一年，替你把想念好好收藏。</p>
+    <div class="field"><label>邮箱</label><input type="email" placeholder="输入你的邮箱"></div>
+    <div class="field"><label>密码</label><input type="password" placeholder="输入密码"></div>
+    <button class="primary" style="width:100%;padding:14px" onclick="enter()">登录 / 进入我的空间</button>
+    <div class="demo">正式版根据登录账号自动识别身份，不需要选择角色。<br>体验账号：me@example.com / her@example.com</div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+<header class="topbar">
+  <div class="brand"><div class="logo">♡</div><div><strong>想你的365天</strong><small>每天一个想你的瞬间</small></div></div>
+  <nav class="nav" id="nav"></nav>
+  <div class="profile"><div class="avatar">🌷</div><span id="profileName">只想你</span></div>
+</header>
+<main class="shell" id="content"></main>
+<div class="bottomnav" id="bottomnav"></div>
+</div>
+
+<script>
+let role='owner', current='home';
+
+const demoAccounts = {
+  'me@example.com': 'owner',
+  'her@example.com': 'partner'
+};
+
+const memories=[
+ ['8月13日','今天路过一家花店，看到一束花被包得特别认真。突然想到，如果是送给你，我大概会挑很久。'],
+ ['8月12日','下雨了。突然想知道你有没有带伞。'],
+ ['8月11日','今天很累。但想到你的时候，所有的疲惫好像都轻了一点。'],
+ ['8月10日','晚饭吃到一个很好吃的东西。第一反应是：如果你在，你应该会喜欢。']
+];
+
+function inferRoleFromAccount(){
+  const email = document.querySelector('#login input:not([type="password"])')?.value?.trim().toLowerCase() || '';
+  return demoAccounts[email] || 'owner';
+}
+
+function enter(){
+  role = inferRoleFromAccount();
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  render();
+}
+
+function navItem(id,label,icon){return `<button class="${current===id?'active':''}" onclick="go('${id}')">${icon} ${label}</button>`}
+function go(id){current=id;render()}
+function render(){
+ const nav=role==='owner'
+ ? [navItem('home','首页','♡'),navItem('records','我的记录','✎'),navItem('timeline','时间轴','⌁'),navItem('story','我们的故事','✧'),navItem('settings','设置','⚙')]
+ : [navItem('home','首页','♡'),navItem('timeline','时间轴','⌁'),navItem('story','我们的故事','✧'),navItem('settings','设置','⚙')];
+ document.getElementById('nav').innerHTML=nav;
+ document.getElementById('profileName').textContent=role==='owner'?'只想你':'她';
+ document.getElementById('bottomnav').innerHTML=(role==='owner'
+ ? [navItem('home','首页','⌂'),navItem('records','记录','✎'),navItem('timeline','时间轴','♡'),navItem('story','故事','✧'),navItem('settings','我的','☼')]
+ : [navItem('home','首页','⌂'),navItem('timeline','时间轴','♡'),navItem('story','故事','✧'),navItem('settings','我的','☼')]).join('');
+ let c='';
+ if(current==='home') c=home();
+ if(current==='records') c=records();
+ if(current==='timeline') c=timeline();
+
+ if(current==='story') c=story();
+ if(current==='settings') c=settings();
+ document.getElementById('content').innerHTML=c;
+}
+function hero(){
+return `<section class="hero">
+  <div style="position:relative;z-index:2">
+    <div class="sub">2026.08.14 — 2027.02.14</div>
+    <h1>想你的365天</h1>
+    <p>从今年情人节开始，<br>记录每一天想你的瞬间，<br>直到下一次情人节。</p>
+  </div>
+  <div class="hero-art"><div class="lamp"></div><div class="book"></div></div>
+</section>
+<div class="stats">
+ <div class="stat"><b>182</b><span>正在走过的第几天</span></div>
+ <div class="stat"><b>47</b><span>已经留下的想念</span></div>
+ <div class="stat"><b>71%</b><span>这一年的旅程</span></div>
+ <div class="stat"><b>♥</b><span>今天也在想她</span></div>
+</div>`;
+}
+function home(){
+if(role==='partner') return `${hero()}<div class="grid">
+<div><div class="card"><h2>今天的信</h2><div class="sub">他今天留给你的一个瞬间</div><div style="margin-top:20px;padding:22px;background:#fff5f5;border-radius:18px;line-height:1.9">今天路过一家花店，看到一束花被包得特别认真。突然想到，如果是送给你，我大概会挑很久。</div><button class="primary" style="margin-top:15px" onclick="go('timeline')">打开完整的想念 →</button></div></div>
+<div>${recent()}</div></div>`;
+return `${hero()}<div class="grid"><div>${calendar()}<div class="card" style="margin-top:18px"><h2>想你小贴士</h2><p style="line-height:1.8;color:#765a60">今天不要只写“我想你”。<br>写一个让你突然想起她的具体瞬间。</p></div></div><div><div class="card"><h2>今天想她的瞬间 <span class="sub" style="float:right">8月14日 · 星期五</span></h2><div class="write"><textarea placeholder="今天发生了什么，让你突然想起了她？"></textarea><div class="tools"><button class="chip">😊 心情</button><button class="chip">📷 图片</button><button class="chip">☀️ 天气</button><button class="chip">📍 地点</button></div><div class="write-actions"><span class="sub">0 / 1000</span><button class="primary" onclick="alert('这一刻已经被好好保存。')">保存今天的想念 ♥</button></div></div></div>${recent()}</div></div>`;
+}
+function calendar(){return `<div class="card"><div class="calendar-head"><button>‹</button><b>2026年8月</b><button>›</button></div><div class="week">${['日','一','二','三','四','五','六'].map(x=>`<div>${x}</div>`).join('')}</div><div class="days">${Array.from({length:31},(_,i)=>{let d=i+1;return `<div class="day ${[3,8,10,11,12,13].includes(d)?'dot ':''}${d===14?'today':''}">${d}</div>`}).join('')}</div><button style="margin-top:15px;width:100%;padding:11px;border-radius:12px;background:#fff0f2;color:#d46373" onclick="go('records')">查看全部记录</button></div>`}
+function recent(){return `<div class="card timeline"><h2>最近的想念 <span class="sub" style="float:right">查看全部 →</span></h2>${memories.slice(0,4).map((m,i)=>`<div class="memory"><div class="date"><div>${m[0]}</div><div class="heartline"></div></div><div><h3>${i===0?'花店里的那一刻':i===1?'下雨的时候':i===2?'很累的一天':'第一口晚餐'}</h3><p>${m[1]}</p></div></div>`).join('')}</div>`}
+function records(){return `<div class="page-title">我的记录</div><div class="page-sub">一年里的每一个小瞬间，都值得被留下。</div><div class="grid"><div>${calendar()}</div><div>${recent()}<div class="card" style="margin-top:18px"><h2>记录统计</h2><div class="stats" style="margin-top:0"><div class="stat"><b>47</b><span>已记录</span></div><div class="stat"><b>9</b><span>照片</span></div><div class="stat"><b>12</b><span>特别想念</span></div><div class="stat"><b>31</b><span>连续记录</span></div></div></div></div></div>`}
+function timeline(){return `<div class="page-title">${role==='owner'?'我们的想念时间轴':'他留给你的时间轴'}</div><div class="page-sub">${role==='owner'?'把这一年慢慢写成一本书。':'从第一天开始，重新走一遍这一年的想念。'}</div><div class="card">${memories.concat([['8月09日','今天没有发生特别的事情，但回家的路上看见晚霞，还是第一时间想到了你。'],['8月08日','有人问我最近是不是在等什么。我笑了笑，没有回答。']]).map((m,i)=>`<div class="memory"><div class="date"><div>${m[0]}</div><div class="heartline"></div></div><div><h3>${['花店里的那一刻','下雨的时候','很累的一天','第一口晚餐','晚霞','没有答案的问题'][i]}</h3><p>${m[1]}</p>${i===0&&role==='partner'?'<div style="margin-top:12px"><button class="chip">♥ 收到啦</button><button class="chip">我也想你</button></div>':''}</div></div>`).join('')}</div>`}
+function story(){return `<div class="page-title">我们的故事</div><div class="page-sub">这里不记录全部，只记录那些只有我们知道的事情。</div><div class="story"><div class="card big"><h2>我们是怎么认识的</h2><p>把第一次认识、第一次心动、第一次认真聊天的那一天写在这里。正式版可以添加照片、地点、时间与专属文字。</p></div><div class="card"><h2>特别的日期</h2><p>第一次认识 · 2026.01.18</p><p>第一次说想你 · 2026.02.02</p><p>第一个情人节 · 2026.02.14</p></div><div class="card"><h2>只有我们知道</h2><p>一个只有你们两个人懂的暗号、一句话、一段回忆。</p></div></div>`}
+function settings(){return `<div class="page-title">设置</div><div class="page-sub">让这个小世界只属于你们。</div><div class="card settings">
+<div class="setting-row"><div><b>每日提醒</b><div class="sub">提醒自己留下今天的想念</div></div><div class="switch"></div></div>
+<div class="setting-row"><div><b>私密模式</b><div class="sub">草稿默认只有自己可见</div></div><div class="switch"></div></div>
+<div class="setting-row"><div><b>纪念日</b><div class="sub">2027年2月14日 · 一年后的情人节</div></div><span>♡</span></div>
+<div class="setting-row"><div><b>关系身份</b><div class="sub">${role==='owner'?'记录的人':'收到的人'}</div></div><span>›</span></div>
+</div>`}
+</script>
+</body>
+</html>
