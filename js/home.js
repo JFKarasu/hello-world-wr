@@ -89,7 +89,14 @@ async function fetchMemories() {
     console.log("Fetched raw data from Supabase:", data); // Debugging output to see what was actually retrieved
     
     if (data && data.length > 0) {
-      memories = data;
+      memories = data.map(m => {
+        // 根据 created_at 动态生成 date_str，保证修改时间戳后前端显示同步更新
+        if (m.created_at) {
+          const d = new Date(m.created_at);
+          m.date_str = `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+        return m;
+      });
     } else {
       memories = [];
     }
