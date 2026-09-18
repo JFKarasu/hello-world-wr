@@ -79,7 +79,8 @@ const memories=[
 ];
 
 function inferRoleFromAccount(){
-  const email = document.querySelector('#login input:not([type="password"])')?.value?.trim().toLowerCase() || '';
+  const emailInput = document.querySelector('#login input[type="email"]');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
   return demoAccounts[email] || 'owner';
 }
 
@@ -96,7 +97,7 @@ function render(){
  const nav=role==='owner'
  ? [navItem('home','首页','♡'),navItem('records','我的记录','✎'),navItem('timeline','时间轴','⌁'),navItem('story','我们的故事','✧'),navItem('settings','设置','⚙')]
  : [navItem('home','首页','♡'),navItem('timeline','时间轴','⌁'),navItem('story','我们的故事','✧'),navItem('settings','设置','⚙')];
- document.getElementById('nav').innerHTML=nav;
+ document.getElementById('nav').innerHTML=nav.join('');
  document.getElementById('profileName').textContent=role==='owner'?'只想你':'她';
  document.getElementById('bottomnav').innerHTML=(role==='owner'
  ? [navItem('home','首页','⌂'),navItem('records','记录','✎'),navItem('timeline','时间轴','♡'),navItem('story','故事','✧'),navItem('settings','我的','☼')]

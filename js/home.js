@@ -1,6 +1,11 @@
 let role='owner', current='home';
 let memories = []; // 改为空数组，由数据库加载
-let draftState = { mood: '', weather: '', location: '', imageBase64: '' };
+let currentPage = 0; // 当前页码
+let hasMore = true; // 是否还有更多数据
+const PAGE_SIZE = 10; // 每页数量
+let allMemoryDates = []; // 用于日历打点和计算连续天数的全局日期
+let globalStats = { totalRecords: 0, totalPhotos: 0, totalSpecial: 0, streak: 0, hasToday: false };
+let draftState = { mood: '', weather: '', location: '', imageUrl: '' };
 let currentCalendarDate = new Date(); // 用于日历切换月份
 
 const SUPABASE_URL = 'https://vsdruhuyavrnsivkzwzv.supabase.co';
@@ -52,7 +57,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('app').classList.remove('hidden');
     
     Swal.fire({ title: '加载中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-    await fetchMemories();
+    await Promise.all([fetchMemories(), fetchGlobalStats()]);
     render();
     Swal.close();
     return;
@@ -73,36 +78,90 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-async function fetchMemories() {
+async function fetchGlobalStats() {
   try {
+    const [datesRes, photosRes, specialRes] = await Promise.all([
+      supabaseClient.from('memories').select('created_at').order('created_at', { ascending: false }),
+      // Because image_urls is text, we just check if it's not null and not empty
+      supabaseClient.from('memories').select('*', { count: 'exact', head: true }).not('image_urls', 'is', null).neq('image_urls', ''),
+      supabaseClient.from('memories').select('*', { count: 'exact', head: true }).eq('is_special', true)
+    ]);
+
+    if (datesRes.data) {
+      allMemoryDates = datesRes.data.map(m => m.created_at ? new Date(m.created_at) : new Date());
+      globalStats.totalRecords = allMemoryDates.length;
+      
+      const uniqueDates = [...new Set(allMemoryDates.map(d => {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      }))].sort((a, b) => b - a);
+      
+      let streak = 0;
+      if (uniqueDates.length > 0) {
+        streak = 1;
+        const oneDay = 24 * 60 * 60 * 1000;
+        for (let i = 0; i < uniqueDates.length - 1; i++) {
+          const diff = Math.round((uniqueDates[i] - uniqueDates[i+1]) / oneDay);
+          if (diff === 1) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+      }
+      globalStats.streak = streak;
+
+      const now = new Date();
+      const todayTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      globalStats.hasToday = uniqueDates.length > 0 && uniqueDates[0] === todayTime;
+    }
+
+    globalStats.totalPhotos = photosRes.count || 0;
+    globalStats.totalSpecial = specialRes.count || 0;
+  } catch (err) {
+    console.error("加载统计数据失败:", err);
+  }
+}
+
+async function fetchMemories(append = false) {
+  try {
+    const from = currentPage * PAGE_SIZE;
+    const to = (currentPage + 1) * PAGE_SIZE - 1;
+    
     const { data, error } = await supabaseClient
       .from('memories')
       .select('*, reactions(*)')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
       
     if (error) {
       console.error("Supabase Select Error:", error);
-      memories = [];
+      hasMore = false;
+      if (!append) memories = [];
       return;
     }
     
-    console.log("Fetched raw data from Supabase:", data); // Debugging output to see what was actually retrieved
-    
     if (data && data.length > 0) {
-      memories = data.map(m => {
-        // 根据 created_at 动态生成 date_str，保证修改时间戳后前端显示同步更新
+      const newMemories = data.map(m => {
         if (m.created_at) {
           const d = new Date(m.created_at);
           m.date_str = `${d.getMonth() + 1}月${d.getDate()}日`;
         }
         return m;
       });
+      if (append) {
+        memories = [...memories, ...newMemories];
+      } else {
+        memories = newMemories;
+      }
+      hasMore = data.length === PAGE_SIZE;
     } else {
-      memories = [];
+      hasMore = false;
+      if (!append) memories = [];
     }
   } catch (err) {
     console.error("加载数据失败:", err);
-    memories = [];
+    hasMore = false;
+    if (!append) memories = [];
   }
 }
 
@@ -121,13 +180,25 @@ async function enter(){
   
   Swal.fire({ title: '加载中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
   
+  role = assignedRole;
+  currentPage = 0; // 重置页码
+  hasMore = true; // 重置更多数据状态
+  memories = []; // 清空现有数据
   await fetchMemories();
   
-  role = assignedRole;
   document.getElementById('login').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   render();
   
+  Swal.close();
+}
+
+async function loadMoreMemories() {
+  if (!hasMore) return; // 没有更多数据则不执行
+  currentPage++;
+  Swal.fire({ title: '加载更多...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+  await fetchMemories(true); // 传入 true 表示追加数据
+  render(); // 重新渲染页面以显示新数据
   Swal.close();
 }
 
@@ -170,13 +241,10 @@ function hero(){
   const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
   // 避免天数计算出现负数或者0的问题，使用浮点数计算确保精度
   const percent = Math.min(100, Math.max(0, Math.round((daysPassed / totalDays) * 100)));
-  const count = memories.length;
+  const count = globalStats.totalRecords; // 使用全局总记录数
   
-  // 生成与数据库格式匹配的日期字符串，例如：2月14日、8月19日（注意没有补零）
-  const dateStr = `${now.getMonth() + 1}月${now.getDate()}日`;
-  // 检查是否包含当天的日期字符串
-  const hasToday = memories.some(m => m.date_str && m.date_str.includes(dateStr));
-  const heartColor = hasToday ? '#d46373' : '#ccc';
+  // 使用全局状态判断今天是否想念
+  const heartColor = globalStats.hasToday ? '#d46373' : '#ccc';
 
   return `<section class="hero">
   <div style="position:relative;z-index:2">
@@ -226,8 +294,8 @@ async function saveMemory() {
       is_special: false
     };
     
-    if (draftState.imageBase64) {
-      payload.image_urls = [draftState.imageBase64];
+    if (draftState.imageUrl) {
+      payload.image_urls = draftState.imageUrl;
     }
     
     const { error } = await supabaseClient
@@ -249,7 +317,7 @@ async function saveMemory() {
     if (titleInput) titleInput.value = '';
     
     // 清空草稿状态
-    draftState = { mood: '', weather: '', location: '', imageBase64: '' };
+    draftState = { mood: '', weather: '', location: '', imageUrl: '' };
     updateChips();
     
     // 重新拉取数据并重新渲染整个内容区
@@ -350,6 +418,94 @@ function setLocation() {
   }
 }
 
+// Helper function to convert dataURL to Blob
+function dataURLtoBlob(dataurl) {
+  var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], {type:mime});
+}
+
+function triggerFixLegacyImage(memoryId) {
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      Swal.fire({ title: '修复图片中...', text: '正在上传新图片并更新记录', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+          } else {
+            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          const blob = dataURLtoBlob(compressedBase64);
+          const fileName = `fixed-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
+
+          try {
+            // 1. 上传新图片到 Storage
+            const { error: uploadError } = await supabaseClient.storage
+              .from('memory-images')
+              .upload(fileName, blob, { contentType: 'image/jpeg' });
+
+            if (uploadError) throw uploadError;
+
+            // 2. 获取新的公共 URL
+            const { data: publicUrlData } = supabaseClient.storage
+              .from('memory-images')
+              .getPublicUrl(fileName);
+            
+            const newImageUrl = publicUrlData.publicUrl;
+
+            // 3. 更新数据库，用新的 URL 替换旧的 Base64 字符串
+            const { error: updateError } = await supabaseClient
+              .from('memories')
+              .update({ image_urls: newImageUrl })
+              .eq('id', memoryId);
+
+            if (updateError) throw updateError;
+
+            // 4. 成功后重新拉取数据并刷新页面
+            Swal.fire({ icon: 'success', title: '修复成功！', timer: 1500, showConfirmButton: false });
+            
+            currentPage = 0; // 重置分页
+            await fetchMemories();
+            render();
+
+          } catch (err) {
+            console.error("修复图片失败:", err);
+            Swal.fire({ icon: 'error', title: '修复失败', text: '请检查网络或 Storage 配置', confirmButtonColor: '#d46373' });
+          }
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
+}
+
 function triggerImageUpload() {
   let input = document.getElementById('image-upload-input');
   if (!input) {
@@ -361,10 +517,70 @@ function triggerImageUpload() {
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
+        Swal.fire({ title: '上传图片中...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
         const reader = new FileReader();
         reader.onload = (evt) => {
-          draftState.imageBase64 = evt.target.result;
-          updateChips();
+          // 引入 Canvas 进行前端压缩
+          const img = new Image();
+          img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800; // 限制最大宽度
+            const MAX_HEIGHT = 800; // 限制最大高度
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 将图片压缩为 JPEG，质量设为 0.8
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            const blob = dataURLtoBlob(compressedBase64);
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
+
+            try {
+              // 上传到 Supabase Storage
+              const { data, error } = await supabaseClient.storage
+                .from('memory-images')
+                .upload(fileName, blob, {
+                  contentType: 'image/jpeg'
+                });
+
+              if (error) {
+                throw error;
+              }
+
+              // 获取公共 URL
+              const { data: publicUrlData } = supabaseClient.storage
+                .from('memory-images')
+                .getPublicUrl(fileName);
+
+              draftState.imageUrl = publicUrlData.publicUrl;
+              updateChips();
+              Swal.close();
+            } catch (err) {
+              console.error("上传图片失败:", err);
+              Swal.fire({
+                icon: 'error',
+                title: '上传失败',
+                text: '请检查网络或 Storage 配置',
+                confirmButtonColor: '#d46373'
+              });
+            }
+          };
+          img.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -375,7 +591,7 @@ function triggerImageUpload() {
 }
 
 function clearDraft(key) {
-  if (key === 'image') draftState.imageBase64 = '';
+  if (key === 'image') draftState.imageUrl = '';
   if (key === 'mood') draftState.mood = '';
   if (key === 'weather') draftState.weather = '';
   if (key === 'location') draftState.location = '';
@@ -387,9 +603,9 @@ function updateChips() {
   if (!previewContainer) return;
   
   let html = '';
-  if (draftState.imageBase64) {
+  if (draftState.imageUrl) {
     html += `<div style="position:relative; display:inline-block; margin-right: 10px;">
-               <img src="${draftState.imageBase64}" style="height:80px; border-radius:8px; object-fit:cover; border: 1px solid #eee;">
+               <img src="${draftState.imageUrl}" style="height:80px; border-radius:8px; object-fit:cover; border: 1px solid #eee;">
                <button onclick="clearDraft('image')" style="position:absolute; top:-6px; right:-6px; background:#333; color:#fff; border:none; border-radius:50%; width:20px; height:20px; line-height:18px; text-align:center; font-size:14px; cursor:pointer; padding:0;">×</button>
              </div>`;
   }
@@ -426,18 +642,21 @@ function calendar(){
   const now = new Date();
   const today = (now.getFullYear() === year && now.getMonth() === month) ? now.getDate() : null;
   
-  // 生成与数据库对应的月份前缀，如 "8月"
-  const monthStr = `${month + 1}月`;
-  // 找出在这个月有记录的具体日子
-  const memoryDays = memories
-    .filter(m => m.date_str && m.date_str.startsWith(monthStr))
-    .map(m => {
-      // 提取 "8月19日" 中的 "19"
-      const dayMatch = m.date_str.match(/月(\d+)日/);
-      return dayMatch ? parseInt(dayMatch[1], 10) : -1;
-    });
+  // 找出在这个月有记录的具体日子（使用全局的所有记录日期）
+  const memoryDays = allMemoryDates
+    .filter(d => d.getFullYear() === year && d.getMonth() === month)
+    .map(d => d.getDate());
     
-  const daysHtml = Array.from({length: daysInMonth}, (_, i) => {
+  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 for Sunday, 1 for Monday, ...
+  
+  let daysHtml = '';
+  // Add empty divs for the days before the 1st of the month
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    daysHtml += `<div class="day empty"></div>`;
+  }
+
+  // Add the actual days of the month
+  daysHtml += Array.from({length: daysInMonth}, (_, i) => {
     let d = i + 1;
     let isDot = memoryDays.includes(d) ? 'dot ' : '';
     let isToday = d === today ? 'today' : '';
@@ -464,18 +683,42 @@ function viewImage(src) {
 
 function renderMemoryMeta(m) {
   let html = '';
-  // Safely parse image_urls in case Supabase returns it as a stringified JSON array
+  // Handle image_urls properly since it might be a single raw URL string now, 
+  // or a legacy JSON string/array
   let images = m.image_urls;
+  let imgUrl = null;
+
   if (typeof images === 'string') {
-    try {
-      images = JSON.parse(images);
-    } catch (e) {
-      images = [images]; // Fallback if it's just a raw string URL
+    if (images.startsWith('http') || images.startsWith('data:image')) {
+      // It's a raw URL or raw Base64 string
+      imgUrl = images;
+    } else {
+      try {
+        const parsed = JSON.parse(images);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          imgUrl = parsed[0];
+        } else if (typeof parsed === 'string') {
+          imgUrl = parsed;
+        }
+      } catch (e) {
+        // Fallback, assume it's just a raw string
+        imgUrl = images;
+      }
     }
+  } else if (Array.isArray(images) && images.length > 0) {
+    imgUrl = images[0];
   }
   
-  if (images && Array.isArray(images) && images.length > 0) {
-    html += `<div style="margin-top:10px;"><img src="${images[0]}" onclick="viewImage('${images[0]}')" style="max-width:50%; height:auto; border-radius:8px; border:1px solid #eee; cursor:pointer;"></div>`;
+  if (imgUrl) {
+    // 判断是否为旧版的 Base64 数据 (以 data:image 开头，且特别长)
+    if (imgUrl.startsWith('data:image') && imgUrl.length > 1000) {
+      html += `<div style="margin-top:10px; padding: 12px; background: #fff3f4; border-radius: 8px; border: 1px dashed #f4dedf;">
+                 <div style="font-size: 13px; color: #8b6a70; margin-bottom: 8px;">这是一条包含旧版超大格式图片的记录，会导致加载缓慢。</div>
+                 <button class="chip" style="background: #f47f91; color: #fff; border: none; padding: 6px 12px;" onclick="triggerFixLegacyImage(${m.id})">📸 重新上传图片修复</button>
+               </div>`;
+    } else {
+      html += `<div style="margin-top:10px;"><img src="${imgUrl}" onclick="viewImage('${imgUrl}')" style="max-width:50%; height:auto; border-radius:8px; border:1px solid #eee; cursor:pointer;"></div>`;
+    }
   }
   let tags = '';
   if (m.mood) tags += `<span style="display:inline-block; font-size:12px; background:#fff0f5; color:#e83e8c; padding:4px 10px; border-radius:12px; margin-right:8px; margin-top:8px; border:1px solid #fbcfe8;">${m.mood}</span>`;
@@ -487,41 +730,23 @@ function renderMemoryMeta(m) {
   return html;
 }
 
-function recent(){return `<div class="card timeline"><h2>最近的想念 <span class="sub" style="float:right; cursor:pointer;" onclick="go('records')">查看全部 →</span></h2>${memories.slice(0,4).map((m,i)=>`<div class="memory"><div class="date"><div>${m.date_str}</div><div class="heartline"></div></div><div><h3>${m.title || '日常想念'}</h3><p>${m.content}</p>${renderMemoryMeta(m)}</div></div>`).join('')}</div>`}
-function calculateStreak() {
-  if (!memories.length) return 0;
+function recent(){
+  // 在"最近的想念"中，我们展示当前已加载的所有数据。
+  // 如果想限制这里的高度，可以使用 memories.slice(0, currentPage * PAGE_SIZE + PAGE_SIZE) 
+  // 但既然已经有了分页，直接 map 现有的 memories 即可
+  const recentMemoriesHtml = memories.map((m,i)=>`<div class="memory"><div class="date"><div>${m.date_str}</div><div class="heartline"></div></div><div><h3>${m.title || '日常想念'}</h3><p>${m.content}</p>${renderMemoryMeta(m)}</div></div>`).join('');
   
-  // 将所有记录的日期提取出来，转换为当天的零点时间戳以进行计算
-  const uniqueDates = [...new Set(memories.map(m => {
-    const d = m.created_at ? new Date(m.created_at) : new Date();
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  }))].sort((a, b) => b - a); // 降序排列
-  
-  let streak = 1;
-  const oneDay = 24 * 60 * 60 * 1000;
-  
-  for (let i = 0; i < uniqueDates.length - 1; i++) {
-    const diff = Math.round((uniqueDates[i] - uniqueDates[i+1]) / oneDay);
-    if (diff === 1) {
-      streak++;
-    } else {
-      break;
-    }
+  let loadMoreButtonHtml = '';
+  if (hasMore) {
+    loadMoreButtonHtml = `<button class="primary" style="width:100%;padding:11px;border-radius:12px;background:#fff0f2;color:#d46373; margin-top: 15px;" onclick="loadMoreMemories()">加载更多 ♥</button>`;
   }
-  return streak;
-}
-
+  
+  return `<div class="card timeline"><h2>最近的想念 <span class="sub" style="float:right; cursor:pointer;" onclick="go('timeline')">查看时间轴 →</span></h2>${recentMemoriesHtml}${loadMoreButtonHtml}</div>`}
 function records(){
-  const totalRecords = memories.length;
-  const totalPhotos = memories.filter(m => {
-    let imgs = m.image_urls;
-    if (typeof imgs === 'string') {
-      try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
-    }
-    return Array.isArray(imgs) && imgs.length > 0;
-  }).length;
-  const totalSpecial = memories.filter(m => m.is_special).length;
-  const streak = calculateStreak();
+  const totalRecords = globalStats.totalRecords;
+  const totalPhotos = globalStats.totalPhotos;
+  const totalSpecial = globalStats.totalSpecial;
+  const streak = globalStats.streak;
   
   // 给左侧的日历和右侧的内容区分别加上 height: max-content 或者去除外边距
   return `<div class="page-title">我的记录</div><div class="page-sub">一年里的每一个小瞬间，都值得被留下。</div>
@@ -542,7 +767,7 @@ function records(){
   </div>`;
 }
 function timeline(){
-  return `<div class="page-title">${role==='owner'?'我们的想念时间轴':'他留给你的时间轴'}</div><div class="page-sub">${role==='owner'?'把这一年慢慢写成一本书。':'从第一天开始，重新走一遍这一年的想念。'}</div><div class="card">${memories.map((m) => {
+  const timelineMemoriesHtml = memories.map((m) => {
     let reactionHtml = '';
     if (m.reactions && m.reactions.length > 0) {
       reactionHtml = `<div style="margin-top:12px; color: #d46373; font-size: 14px;">${m.reactions.map(r => `<span style="background: #fff0f2; padding: 4px 10px; border-radius: 12px; margin-right: 8px;">${r.reaction_type}</span>`).join('')}</div>`;
@@ -550,7 +775,14 @@ function timeline(){
       reactionHtml = `<div style="margin-top:12px" id="reaction-container-${m.id}"><button class="chip" onclick="addReaction(${m.id}, '♥ 收到啦')">♥ 收到啦</button><button class="chip" onclick="addReaction(${m.id}, '我也想你')">我也想你</button></div>`;
     }
     return `<div class="memory"><div class="date"><div>${m.date_str}</div><div class="heartline"></div></div><div><h3>${m.title || '日常想念'}</h3><p>${m.content}</p>${renderMemoryMeta(m)}${reactionHtml}</div></div>`;
-  }).join('')}</div>`;
+  }).join('');
+
+  let loadMoreButtonHtml = '';
+  if (hasMore) {
+    loadMoreButtonHtml = `<button class="primary" style="width:100%;padding:11px;border-radius:12px;background:#fff0f2;color:#d46373; margin-top: 15px;" onclick="loadMoreMemories()">加载更多 ♥</button>`;
+  }
+
+  return `<div class="page-title">${role==='owner'?'我们的想念时间轴':'他留给你的时间轴'}</div><div class="page-sub">${role==='owner'?'把这一年慢慢写成一本书。':'从第一天开始，重新走一遍这一年的想念。'}</div><div class="card">${timelineMemoriesHtml}${loadMoreButtonHtml}</div>`;
 }
 
 async function addReaction(memoryId, reactionType) {
